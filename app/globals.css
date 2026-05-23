@@ -127,6 +127,138 @@
 
 /* Trading-specific styles */
 @layer components {
+  /* Glassmorphic cards with backdrop blur */
+  .glass-card {
+    @apply rounded-lg border border-border/20 bg-card/30 backdrop-blur-md p-4 transition-all duration-200 ease-in-out hover:bg-card/50 hover:border-accent/30;
+  }
+
+  .glass-card-lg {
+    @apply rounded-lg border border-border/20 bg-card/20 backdrop-blur-lg p-6 transition-all duration-200 ease-in-out hover:bg-card/40 hover:border-accent/20;
+  }
+
+  /* Scroll-triggered fade-in animations */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideInLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes slideInRight {
+    from {
+      opacity: 0;
+      transform: translateX(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  /* Section divider gradient animation */
+  @keyframes gradientShift {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
+  .gradient-divider {
+    @apply h-px bg-gradient-to-r from-transparent via-accent/50 to-transparent;
+    animation: gradientShift 4s ease-in-out infinite;
+    background-size: 200% 100%;
+  }
+
+  /* Floating badge orbit animation */
+  @keyframes orbit {
+    from {
+      transform: rotate(0deg) translateX(80px) rotate(-360deg);
+    }
+    to {
+      transform: rotate(360deg) translateX(80px) rotate(-360deg);
+    }
+  }
+
+  .floating-orbit {
+    animation: orbit 15s linear infinite;
+    transform-origin: 50% 50%;
+  }
+
+  /* Particle burst on click */
+  @keyframes particleBurst {
+    from {
+      opacity: 1;
+      transform: translate(var(--tx), var(--ty))) scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: translate(calc(var(--tx) * 2), calc(var(--ty) * 2)) scale(0);
+    }
+  }
+
+  .particle {
+    animation: particleBurst 0.6s ease-out forwards;
+    pointer-events: none;
+  }
+
+  /* Text reveal animation */
+  @keyframes textReveal {
+    from {
+      clip-path: inset(0 100% 0 0);
+    }
+    to {
+      clip-path: inset(0 0 0 0);
+    }
+  }
+
+  .text-reveal {
+    animation: textReveal 0.8s ease-out;
+  }
+
+  /* Staggered section expansion */
+  @keyframes expandSection {
+    from {
+      opacity: 0;
+      max-height: 0;
+    }
+    to {
+      opacity: 1;
+      max-height: 1000px;
+    }
+  }
+
+  .section-expand {
+    animation: expandSection 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
   /* Trading card borders */
   .trading-card {
     @apply rounded-lg border border-border bg-card p-4;
@@ -141,8 +273,44 @@
     @apply text-destructive;
   }
 
-  /* Smooth transitions */
-  .transition-smooth {
-    @apply transition-all duration-200 ease-in-out;
+  /* Button particle effect on hover */
+  .btn-particle-hover {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-particle-hover::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(22, 163, 74, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.5s, height 0.5s;
+  }
+
+  .btn-particle-hover:hover::before {
+    width: 300px;
+    height: 300px;
+  }
+
+  /* Staggered animation delays */
+  .stagger-1 {
+    animation-delay: 0.1s;
+  }
+  .stagger-2 {
+    animation-delay: 0.2s;
+  }
+  .stagger-3 {
+    animation-delay: 0.3s;
+  }
+  .stagger-4 {
+    animation-delay: 0.4s;
+  }
+  .stagger-5 {
+    animation-delay: 0.5s;
   }
 }
