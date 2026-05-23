@@ -13,6 +13,9 @@ export default function SettingsPage() {
     autopilotThreshold: 70,
     okxApiKey: 'pk_test_***',
     alpacaApiKey: 'pk_test_***',
+    oandaApiKey: 'Bearer token_***',
+    oandaAccountId: 'account_***',
+    oandaEnvironment: 'practice',
     telegramToken: 'bot_***',
     framework: 'Al Brooks',
     notificationEmail: 'user@example.com',
@@ -37,7 +40,7 @@ export default function SettingsPage() {
         {/* API Keys Tab */}
         <TabsContent value="api" className="space-y-6 mt-6">
           <div className="rounded-lg border border-border bg-card p-6 space-y-6">
-            <h2 className="font-semibold">API connections</h2>
+            <h2 className="font-semibold">Exchange API connections</h2>
 
             {/* OKX */}
             <div className="space-y-2">
@@ -80,8 +83,54 @@ export default function SettingsPage() {
               </div>
             </div>
 
+            {/* OANDA */}
+            <div className="space-y-4 pt-4 border-t border-border">
+              <h3 className="font-medium text-sm">OANDA (Commodities & Forex)</h3>
+              
+              <div className="space-y-2">
+                <label className="block text-sm font-medium">API token</label>
+                <div className="flex gap-2">
+                  <Input
+                    type={showApiKeys ? 'text' : 'password'}
+                    placeholder="Bearer token_..."
+                    value={settings.oandaApiKey}
+                    onChange={(e) => setSettings({ ...settings, oandaApiKey: e.target.value })}
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowApiKeys(!showApiKeys)}
+                  >
+                    {showApiKeys ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-medium">Account ID</label>
+                <Input
+                  placeholder="account_..."
+                  value={settings.oandaAccountId}
+                  onChange={(e) => setSettings({ ...settings, oandaAccountId: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-medium">Environment</label>
+                <select
+                  value={settings.oandaEnvironment}
+                  onChange={(e) => setSettings({ ...settings, oandaEnvironment: e.target.value })}
+                  className="w-full rounded-md border border-border bg-card px-3 py-2"
+                >
+                  <option value="practice">Practice (Sandbox)</option>
+                  <option value="live">Live Trading</option>
+                </select>
+                <p className="text-xs text-muted-foreground">Practice mode recommended for testing</p>
+              </div>
+            </div>
+
             {/* Telegram */}
-            <div className="space-y-2">
+            <div className="space-y-2 pt-4 border-t border-border">
               <label className="block text-sm font-medium">Telegram bot token</label>
               <div className="flex gap-2">
                 <Input
@@ -143,7 +192,7 @@ export default function SettingsPage() {
                 ))}
               </select>
               <p className="text-xs text-muted-foreground">
-                Framework used for Claude analysis and signal filtering
+                Framework used for Claude analysis and signal filtering (adjusts for crypto/stock/commodity)
               </p>
             </div>
 
@@ -173,6 +222,12 @@ export default function SettingsPage() {
                 <input type="checkbox" id="whale-alerts" className="w-4 h-4" />
                 <label htmlFor="whale-alerts" className="text-sm">
                   Whale movement alerts
+                </label>
+              </div>
+              <div className="flex items-center gap-2">
+                <input type="checkbox" id="commodity-alerts" defaultChecked className="w-4 h-4" />
+                <label htmlFor="commodity-alerts" className="text-sm">
+                  Commodity price alerts (DXY, gold, oil)
                 </label>
               </div>
             </div>

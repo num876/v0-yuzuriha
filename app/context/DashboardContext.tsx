@@ -11,6 +11,7 @@ export interface Signal {
   price: number;
   timestamp: Date;
   strength: 'strong' | 'medium' | 'weak';
+  assetClass?: 'crypto' | 'stock' | 'commodity';
 }
 
 export interface ActiveSignal extends Signal {
@@ -29,6 +30,8 @@ export interface ScheduledTrade {
   positionSize: number;
   createdAt: Date;
   framework: string;
+  assetClass?: 'crypto' | 'stock' | 'commodity';
+  exchange?: string;
 }
 
 interface DashboardContextType {
@@ -50,7 +53,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   const [signals, setSignals] = useState<Signal[]>([]);
   const [activeSignals, setActiveSignals] = useState<Map<string, ActiveSignal>>(new Map());
   const [scheduledTrades, setScheduledTrades] = useState<Map<string, ScheduledTrade>>(new Map());
-  const [watchlist, setWatchlist] = useState<string[]>(['BTC', 'ETH', 'SOL', 'XRP']);
+  const [watchlist, setWatchlist] = useState<string[]>(['BTC', 'ETH', 'SOL', 'XRP', 'XAUUSD']);
 
   const addSignal = useCallback((signal: Signal) => {
     setSignals(prev => [signal, ...prev.slice(0, 49)]); // Keep last 50

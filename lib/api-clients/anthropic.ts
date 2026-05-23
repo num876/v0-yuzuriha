@@ -19,18 +19,28 @@ export async function analyzeTradeSignal(
   timeframe: string,
   framework: string,
   technicalIndicators?: Record<string, any>,
-  newsSentiment?: 'positive' | 'negative' | 'neutral'
+  newsSentiment?: 'positive' | 'negative' | 'neutral',
+  assetClass: 'crypto' | 'stock' | 'commodity' = 'crypto'
 ): Promise<ClaudeAnalysisResponse> {
   try {
+    // Customize prompt based on asset class
+    const assetClassPrompt = {
+      crypto: 'Focus on blockchain metrics, on-chain volume, and market sentiment.',
+      stock: 'Focus on earnings reports, company fundamentals, and sector trends.',
+      commodity: 'Focus on macro indicators (DXY, Fed rates, inflation data, geopolitical factors) and supply/demand dynamics.',
+    }[assetClass];
+
     const prompt = `You are a professional trading analyst using the ${framework} framework.
 
-Analyze this trading signal:
+Analyze this trading signal for ${assetClass}:
 - Pair: ${pair}
 - Signal: ${signal.toUpperCase()}
 - Current price: $${price}
 - Timeframe: ${timeframe}
 - News sentiment: ${newsSentiment || 'neutral'}
 ${technicalIndicators ? `- Technical indicators: ${JSON.stringify(technicalIndicators)}` : ''}
+
+${assetClassPrompt}
 
 Provide your analysis in the following JSON format:
 {

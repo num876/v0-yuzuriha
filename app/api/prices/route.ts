@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getPrices } from '@/lib/api-clients/coingecko';
+import { getMetalsPrices } from '@/lib/api-clients/metals';
+
+// Commodity symbols that need special handling
+const COMMODITY_SYMBOLS = ['XAUUSD', 'XAGUSD', 'USOIL', 'GLD'];
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,9 +16,25 @@ export async function GET(request: NextRequest) {
       }, { status: 400 });
     }
 
-    const prices = await getPrices(symbols);
+    // Separate symbols by asset class
+    const cryptoSymbols = symbols.filter(s => !COMMODITY_SYMBOLS.includes(s.toUpperCase()));
+    const commoditySymbols = symbols.filter(s => COMMODITY_SYMBOLS.includes(s.toUpperCase()));
 
-    return NextResponse.json(prices, {
+    let allPrices: Record<string, any> = {};
+
+    // Fetch crypto prices
+    if (cryptoSymbols.length > 0) {
+      const cryptoPrices = await getPrices(cryptoSymbols);
+      allPrices = { ...allPrices, ...cryptoPrices };
+    }
+
+    // Fetch commodity prices
+    if (commoditySymbols.length > 0) {
+      const commodityPrices = await getMetalsPrices(commoditySymbols);
+      allPrices = { ...allPrices, ...commodityPrices };
+    }
+
+    return NextResponse.json(allPrices, {
       headers: {
         'Cache-Control': 'public, s-maxage=5, stale-while-revalidate=10',
       },

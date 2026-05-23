@@ -12,6 +12,7 @@ export async function POST(request: NextRequest) {
       framework,
       technicalIndicators,
       newsSentiment,
+      assetClass = 'crypto',
     } = body;
 
     if (!pair || !signal || !price || !timeframe || !framework) {
@@ -28,7 +29,8 @@ export async function POST(request: NextRequest) {
       timeframe,
       framework,
       technicalIndicators,
-      newsSentiment
+      newsSentiment,
+      assetClass as 'crypto' | 'stock' | 'commodity'
     );
 
     return NextResponse.json(analysis);

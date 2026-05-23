@@ -16,6 +16,9 @@ export default function WatchlistPage() {
       { symbol: 'AAPL', name: 'Apple', notes: '' },
       { symbol: 'MSFT', name: 'Microsoft', notes: '' },
     ],
+    commodities: [
+      { symbol: 'XAUUSD', name: 'Gold', notes: 'DXY inversely correlated' },
+    ],
   });
 
   const [newAsset, setNewAsset] = useState({ type: 'crypto', symbol: '', name: '', notes: '' });
@@ -25,7 +28,7 @@ export default function WatchlistPage() {
       setWatchlist({
         ...watchlist,
         [newAsset.type]: [
-          ...watchlist[newAsset.type as 'crypto' | 'stocks'],
+          ...watchlist[newAsset.type as 'crypto' | 'stocks' | 'commodities'],
           { symbol: newAsset.symbol.toUpperCase(), name: newAsset.name, notes: newAsset.notes },
         ],
       });
@@ -37,7 +40,7 @@ export default function WatchlistPage() {
     <div className="space-y-6 p-6">
       <div>
         <h1 className="text-3xl font-bold">Watchlist</h1>
-        <p className="text-sm text-muted-foreground">Manage your crypto and stock watchlists</p>
+        <p className="text-sm text-muted-foreground">Manage your crypto, stock, and commodity watchlists</p>
       </div>
 
       {/* Add Asset Form */}
@@ -51,6 +54,7 @@ export default function WatchlistPage() {
           >
             <option value="crypto">Crypto</option>
             <option value="stocks">Stocks</option>
+            <option value="commodities">Commodities</option>
           </select>
           <Input
             placeholder="Symbol"
@@ -146,6 +150,48 @@ export default function WatchlistPage() {
                         setWatchlist({
                           ...watchlist,
                           stocks: watchlist.stocks.filter(a => a.symbol !== asset.symbol),
+                        });
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Commodities Watchlist */}
+      <div className="rounded-lg border border-border bg-card overflow-hidden">
+        <div className="border-b border-border bg-secondary p-4">
+          <h2 className="font-semibold">Commodities</h2>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="border-b border-border">
+              <tr>
+                <th className="text-left py-3 px-4 font-medium text-muted-foreground">Symbol</th>
+                <th className="text-left py-3 px-4 font-medium text-muted-foreground">Name</th>
+                <th className="text-left py-3 px-4 font-medium text-muted-foreground">Notes</th>
+                <th className="text-right py-3 px-4 font-medium text-muted-foreground">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {watchlist.commodities.map((asset) => (
+                <tr key={asset.symbol} className="border-b border-border/50 hover:bg-secondary/50">
+                  <td className="py-3 px-4 font-mono font-bold">{asset.symbol}</td>
+                  <td className="py-3 px-4">{asset.name}</td>
+                  <td className="py-3 px-4 text-xs text-muted-foreground">{asset.notes || '-'}</td>
+                  <td className="py-3 px-4 text-right">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setWatchlist({
+                          ...watchlist,
+                          commodities: watchlist.commodities.filter(a => a.symbol !== asset.symbol),
                         });
                       }}
                     >
