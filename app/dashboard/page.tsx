@@ -8,6 +8,7 @@ import { PriceDisplay } from '@/components/yuzuriha/PriceDisplay';
 import { Button } from '@/components/ui/button';
 import { Zap, Clock, ShieldAlert, CheckCircle, Trash2, Download } from 'lucide-react';
 import { TradingViewChart } from '@/components/yuzuriha/TradingViewChart';
+import { isStockSymbol } from '@/lib/utils';
 
 export default function DashboardPage() {
   const { 
@@ -63,7 +64,7 @@ export default function DashboardPage() {
       confidence: 85,
       reasoning: `Manual execution under ${selectedFramework} framework`,
       framework: selectedFramework,
-      assetClass: ['AAPL', 'TSLA', 'NVDA', 'MSFT', 'AMZN'].includes(selectedAsset) ? 'stock' : 'crypto',
+      assetClass: isStockSymbol(selectedAsset) ? 'stock' : 'crypto',
     };
 
     if (settings.isLiveTrading) {
@@ -87,7 +88,7 @@ export default function DashboardPage() {
       positionSize: sizeVal,
       createdAt: new Date().toISOString(),
       framework: selectedFramework,
-      assetClass: ['AAPL', 'TSLA', 'NVDA', 'MSFT', 'AMZN'].includes(selectedAsset) ? 'stock' : 'crypto',
+      assetClass: isStockSymbol(selectedAsset) ? 'stock' : 'crypto',
       exchange: settings.isLiveTrading ? 'Live Exchange' : 'OKX Demo',
     });
 
@@ -236,7 +237,7 @@ export default function DashboardPage() {
                     ))}
                   </select>
                   <span className="rounded border border-[#1e1e3a] bg-[#111128]/50 px-2 py-0.5 text-[10px] font-bold text-muted-foreground uppercase">
-                    {['AAPL', 'TSLA', 'NVDA', 'MSFT', 'AMZN'].includes(selectedAsset) ? 'Stock' : 'Crypto'}
+                    {isStockSymbol(selectedAsset) ? 'Stock' : 'Crypto'}
                   </span>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">

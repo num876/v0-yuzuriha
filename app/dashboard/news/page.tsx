@@ -3,8 +3,10 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useDashboard } from '@/app/context/DashboardContext';
 
 export default function NewsPage() {
+  const { watchlist } = useDashboard();
   const [articles, setArticles] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAsset, setSelectedAsset] = useState('All assets');
@@ -65,13 +67,12 @@ export default function NewsPage() {
           onChange={(e) => setSelectedAsset(e.target.value)}
           className="rounded-xl border border-[#1e1e3a]/50 bg-[#111128]/80 px-3 py-2 text-sm focus:border-[#8b5cf6]/50 focus:ring-1 focus:ring-[#8b5cf6]/20 outline-none text-white cursor-pointer"
         >
-          <option value="All assets">All Assets (Crypto)</option>
-          <option value="BTC">BTC / Bitcoin</option>
-          <option value="ETH">ETH / Ethereum</option>
-          <option value="SOL">SOL / Solana</option>
-          <option value="AAPL">AAPL (Apple)</option>
-          <option value="TSLA">TSLA (Tesla)</option>
-          <option value="NVDA">NVDA (NVIDIA)</option>
+          <option value="All assets">All Assets</option>
+          {watchlist.map((symbol) => (
+            <option key={symbol} value={symbol}>
+              {symbol}
+            </option>
+          ))}
         </select>
         <Button type="submit" className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white px-4 py-2 rounded-xl text-sm border-0 cursor-pointer">
           Search

@@ -9,7 +9,6 @@ import { HeroBackground } from '@/components/landing/HeroBackground';
 import { AnimatedCounter } from '@/components/landing/AnimatedCounter';
 import { YuzurihaLogo } from '@/components/layout/YuzurihaLogo';
 import { EcosystemMarquee } from '@/components/landing/EcosystemMarquee';
-import { WebhookConsole } from '@/components/landing/WebhookConsole';
 import { FAQAccordion } from '@/components/landing/FAQAccordion';
 
 export default function LandingPage() {
@@ -19,7 +18,6 @@ export default function LandingPage() {
   const heroRef = useScrollAnimation();
   const ecosystemRef = useScrollAnimation();
   const pipelineRef = useScrollAnimation();
-  const consoleRef = useScrollAnimation();
   const featuresRef = useScrollAnimation();
   const securityRef = useScrollAnimation();
   const faqRef = useScrollAnimation();
@@ -169,10 +167,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Webhook Interactive Console */}
-      <div ref={consoleRef as any}>
-        <WebhookConsole />
-      </div>
 
       {/* Features Grid */}
       <section ref={featuresRef as any} className="px-6 py-24 relative border-t border-[#1e1e3a]/20">

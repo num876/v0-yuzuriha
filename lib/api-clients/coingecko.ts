@@ -19,6 +19,16 @@ const symbolToId: Record<string, string> = {
   'NEAR': 'near',
   'FIL': 'filecoin',
   'STETH': 'staked-ether',
+  'SUI': 'sui',
+  'PEPE': 'pepe',
+  'ICP': 'internet-computer',
+  'RENDER': 'render-token',
+  'FET': 'fetch-ai',
+  'IMX': 'immutable-x',
+  'STX': 'blockstack',
+  'AAVE': 'aave',
+  'INJ': 'injective-protocol',
+  'DOT': 'polkadot',
 };
 
 export async function getPrices(symbols: string[]) {

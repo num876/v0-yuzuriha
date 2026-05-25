@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readDb, writeDb } from '@/lib/db';
 import { sendTelegramMessage } from '@/lib/api-clients/telegram';
+import { isStockSymbol } from '@/lib/utils';
 
 // GET all signals
 export async function GET(request: NextRequest) {
@@ -56,7 +57,7 @@ export async function POST(request: NextRequest) {
       price: cleanPrice,
       timestamp: new Date().toISOString(),
       strength: cleanConfidence >= 80 ? 'strong' : cleanConfidence >= 60 ? 'medium' : 'weak' as any,
-      assetClass: cleanPair.includes('-') && !['AAPL', 'TSLA', 'NVDA', 'MSFT', 'AMZN'].some(s => cleanPair.startsWith(s)) ? 'crypto' : 'stock' as any,
+      assetClass: isStockSymbol(cleanPair) ? 'stock' : 'crypto' as any,
       reasoning,
       status: 'pending' as any,
     };

@@ -1,6 +1,8 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import { STOCK_SYMBOLS } from '@/lib/utils';
+
 
 export interface Signal {
   id: string;
@@ -83,8 +85,11 @@ const DashboardContext = createContext<DashboardContextType | undefined>(undefin
 
 // Default Watchlist assets (Crypto + Stocks combined)
 const DEFAULT_WATCHLIST = [
-  'BTC', 'ETH', 'DOGE', 'SOL', 'XRP', 'AVAX', 'LINK', 'ADA', 'DOT', 'MATIC', // Crypto
-  'AAPL', 'TSLA', 'NVDA', 'MSFT', 'AMZN' // Stocks
+  // Cryptocurrencies (22 assets)
+  'BTC', 'ETH', 'SOL', 'XRP', 'ADA', 'DOGE', 'LINK', 'AVAX', 'MATIC', 'DOT',
+  'NEAR', 'SUI', 'PEPE', 'ICP', 'OP', 'ARB', 'RENDER', 'FET', 'IMX', 'STX', 'AAVE', 'INJ',
+  // Stocks (40 assets)
+  ...STOCK_SYMBOLS
 ];
 
 export function DashboardProvider({ children }: { children: ReactNode }) {

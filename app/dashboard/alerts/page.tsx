@@ -86,7 +86,7 @@ export default function AlertsPage() {
               {filteredSignals.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="py-8 text-center text-muted-foreground">
-                    No signals found. Run the Webhook simulator on the landing page to ingest signals.
+                    No signals found. Awaiting automated Webhook signals from the TradingView pipeline.
                   </td>
                 </tr>
               ) : (

@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { isStockSymbol } from '@/lib/utils';
 
 interface TradingViewChartProps {
   symbol: string;
@@ -8,7 +9,7 @@ interface TradingViewChartProps {
 
 export function TradingViewChart({ symbol }: TradingViewChartProps) {
   // Map selected symbol to TradingView symbol format (e.g. BTC -> BINANCE:BTCUSDT, AAPL -> NASDAQ:AAPL)
-  const isStock = ['AAPL', 'TSLA', 'NVDA', 'MSFT', 'AMZN'].includes(symbol.toUpperCase());
+  const isStock = isStockSymbol(symbol);
   const tvSymbol = isStock 
     ? `NASDAQ:${symbol.toUpperCase()}` 
     : `BINANCE:${symbol.toUpperCase()}${symbol.toUpperCase().endsWith('USDT') ? '' : 'USDT'}`;
