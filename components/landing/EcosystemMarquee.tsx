@@ -4,13 +4,13 @@ import React from 'react';
 import { BarChart3, TrendingUp, Layers, Zap, Network, Cpu, Bell } from 'lucide-react';
 
 const integrations = [
-  { name: 'TradingView', icon: BarChart3, text: 'Custom Indicators & Webhooks' },
-  { name: 'OKX', icon: TrendingUp, text: 'Spot & Futures Execution' },
-  { name: 'Alpaca', icon: Layers, text: 'US Equities Exchange API' },
-  { name: 'OANDA', icon: Zap, text: 'FX & CFD Routing' },
-  { name: 'Cloudflare', icon: Network, text: 'Edge Worker Validation' },
-  { name: 'Anthropic Claude', icon: Cpu, text: 'Pre-Trade Confidence Score' },
-  { name: 'Telegram Alerts', icon: Bell, text: 'Instant Telemetry Sync' },
+  { name: 'TradingView', icon: BarChart3, text: 'Advanced Strategy Telemetry' },
+  { name: 'OKX', icon: TrendingUp, text: 'Digital Asset Execution' },
+  { name: 'Alpaca', icon: Layers, text: 'US Equities Market Route' },
+  { name: 'OANDA', icon: Zap, text: 'FX & Commodity Routing' },
+  { name: 'Cloudflare', icon: Network, text: 'Edge Latency Protection' },
+  { name: 'Anthropic Claude', icon: Cpu, text: 'AI Strategy Evaluation' },
+  { name: 'Telegram Alerts', icon: Bell, text: 'Instant Notification Feeds' },
 ];
 
 export function EcosystemMarquee() {
