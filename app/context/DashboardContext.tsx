@@ -68,6 +68,7 @@ interface DashboardContextType {
   scheduledTrades: ScheduledTrade[];
   watchlist: string[];
   settings: Settings;
+  loading: boolean;
   addSignal: (signal: Signal) => Promise<void>;
   addActiveSignal: (signal: ActiveSignal) => Promise<void>;
   addScheduledTrade: (trade: ScheduledTrade) => Promise<void>;
@@ -97,6 +98,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   const [activeSignals, setActiveSignals] = useState<ActiveSignal[]>([]);
   const [scheduledTrades, setScheduledTrades] = useState<ScheduledTrade[]>([]);
   const [watchlist, setWatchlist] = useState<string[]>(DEFAULT_WATCHLIST);
+  const [loading, setLoading] = useState(true);
   const [settings, setSettings] = useState<Settings>({
     autopilotThreshold: 70,
     okxApiKey: 'pk_test_***',
@@ -113,6 +115,21 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     mexcSecretKey: 'mexc_secret_***',
   });
 
+  // Client-side initial cache load
+  useEffect(() => {
+    try {
+      const cachedSignals = localStorage.getItem('yuzuriha_signals');
+      const cachedActive = localStorage.getItem('yuzuriha_active_signals');
+      const cachedScheduled = localStorage.getItem('yuzuriha_scheduled_trades');
+
+      if (cachedSignals) setSignals(JSON.parse(cachedSignals));
+      if (cachedActive) setActiveSignals(JSON.parse(cachedActive));
+      if (cachedScheduled) setScheduledTrades(JSON.parse(cachedScheduled));
+    } catch (e) {
+      console.error('Failed to load local storage cache:', e);
+    }
+  }, []);
+
   const refreshData = useCallback(async () => {
     try {
       // Get settings
@@ -127,6 +144,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       if (signalsRes.ok) {
         const signalsData = await signalsRes.json();
         setSignals(signalsData.signals || []);
+        localStorage.setItem('yuzuriha_signals', JSON.stringify(signalsData.signals || []));
       }
 
       // Get trades and scheduled trades
@@ -135,9 +153,13 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
         const tradesData = await tradesRes.json();
         setActiveSignals(tradesData.trades || []);
         setScheduledTrades(tradesData.scheduledTrades || []);
+        localStorage.setItem('yuzuriha_active_signals', JSON.stringify(tradesData.trades || []));
+        localStorage.setItem('yuzuriha_scheduled_trades', JSON.stringify(tradesData.scheduledTrades || []));
       }
     } catch (error) {
       console.error('[v0] Dashboard data sync error:', error);
+    } finally {
+      setLoading(false);
     }
   }, []);
 
@@ -290,6 +312,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
         scheduledTrades,
         watchlist,
         settings,
+        loading,
         addSignal,
         addActiveSignal,
         addScheduledTrade,

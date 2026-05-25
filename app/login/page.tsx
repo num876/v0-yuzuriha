@@ -18,6 +18,8 @@ function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [emailError, setEmailError] = useState(false);
+  const [passwordError, setPasswordError] = useState(false);
 
   // Success message parameter from forgot/reset flows
   const resetSuccess = searchParams.get('reset') === 'success';
@@ -30,8 +32,17 @@ function LoginForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) {
-      setErrorMsg('Please fill in all fields.');
+    setEmailError(false);
+    setPasswordError(false);
+
+    if (!email) {
+      setErrorMsg('Please enter your email address.');
+      setEmailError(true);
+      return;
+    }
+    if (!password) {
+      setErrorMsg('Please enter your password.');
+      setPasswordError(true);
       return;
     }
 
@@ -42,6 +53,8 @@ function LoginForm() {
       const { error } = await signIn(email, password);
       if (error) {
         setErrorMsg(error.message || 'Failed to authenticate.');
+        setEmailError(true);
+        setPasswordError(true);
       } else {
         router.replace('/dashboard');
       }
@@ -109,7 +122,11 @@ function LoginForm() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={isSubmitting}
-                  className="w-full rounded-xl border border-[#1e1e3a]/50 bg-[#111128]/80 backdrop-blur-sm pl-10 pr-3.5 py-2.5 text-sm transition-all duration-200 focus:border-[#8b5cf6]/50 focus:ring-1 focus:ring-[#8b5cf6]/20 hover:border-[#8b5cf6]/30 outline-none text-white"
+                  className={`w-full rounded-xl border bg-[#111128]/80 backdrop-blur-sm pl-10 pr-3.5 py-2.5 text-sm transition-all duration-200 focus:ring-1 outline-none text-white ${
+                    emailError 
+                      ? 'border-destructive/60 focus:border-destructive/60 focus:ring-destructive/20 hover:border-destructive/40' 
+                      : 'border-[#1e1e3a]/50 focus:border-[#8b5cf6]/50 focus:ring-[#8b5cf6]/20 hover:border-[#8b5cf6]/30'
+                  }`}
                 />
               </div>
             </div>
@@ -132,7 +149,11 @@ function LoginForm() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={isSubmitting}
-                  className="w-full rounded-xl border border-[#1e1e3a]/50 bg-[#111128]/80 backdrop-blur-sm pl-10 pr-10 py-2.5 text-sm transition-all duration-200 focus:border-[#8b5cf6]/50 focus:ring-1 focus:ring-[#8b5cf6]/20 hover:border-[#8b5cf6]/30 outline-none text-white"
+                  className={`w-full rounded-xl border bg-[#111128]/80 backdrop-blur-sm pl-10 pr-10 py-2.5 text-sm transition-all duration-200 focus:ring-1 outline-none text-white ${
+                    passwordError 
+                      ? 'border-destructive/60 focus:border-destructive/60 focus:ring-destructive/20 hover:border-destructive/40' 
+                      : 'border-[#1e1e3a]/50 focus:border-[#8b5cf6]/50 focus:ring-[#8b5cf6]/20 hover:border-[#8b5cf6]/30'
+                  }`}
                 />
                 <button
                   type="button"

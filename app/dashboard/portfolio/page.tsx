@@ -6,9 +6,10 @@ import { TrendingUp, TrendingDown, Download } from 'lucide-react';
 import { useDashboard } from '@/app/context/DashboardContext';
 import { usePrices } from '@/app/context/PriceContext';
 import { useEffect } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function PortfolioPage() {
-  const { activeSignals, watchlist } = useDashboard();
+  const { activeSignals, watchlist, loading } = useDashboard();
   const { subscribe, getPrice } = usePrices();
 
   useEffect(() => {
@@ -131,10 +132,16 @@ export default function PortfolioPage() {
           <div key={stat.label} className="rounded-xl border border-[#1e1e3a]/50 p-4 transition-all duration-300 hover:border-[#8b5cf6]/20" style={{ background: 'rgba(12, 12, 29, 0.9)' }}>
             <p className="text-xs font-medium text-muted-foreground mb-1">{stat.label}</p>
             <div className="flex items-end gap-2">
-              <p className="text-2xl font-bold">{stat.value}</p>
-              <p className={`text-sm font-semibold ${stat.isPositive ? 'text-success' : 'text-destructive'}`}>
-                {stat.change}
-              </p>
+              {loading ? (
+                <Skeleton className="h-8 w-24 my-0.5" />
+              ) : (
+                <>
+                  <p className="text-2xl font-bold">{stat.value}</p>
+                  <p className={`text-sm font-semibold ${stat.isPositive ? 'text-success' : 'text-destructive'}`}>
+                    {stat.change}
+                  </p>
+                </>
+              )}
             </div>
           </div>
         ))}
@@ -171,7 +178,18 @@ export default function PortfolioPage() {
               </tr>
             </thead>
             <tbody>
-              {positions.length === 0 ? (
+              {loading ? (
+                Array.from({ length: 3 }).map((_, idx) => (
+                  <tr key={idx} className="border-b border-[#1e1e3a]/50">
+                    <td className="py-3 px-2"><Skeleton className="h-5 w-20" /></td>
+                    <td className="py-3 px-2"><Skeleton className="h-5 w-16 ml-auto" /></td>
+                    <td className="py-3 px-2"><Skeleton className="h-5 w-20 ml-auto" /></td>
+                    <td className="py-3 px-2"><Skeleton className="h-5 w-20 ml-auto" /></td>
+                    <td className="py-3 px-2"><Skeleton className="h-5 w-16 ml-auto" /></td>
+                    <td className="py-3 px-2"><Skeleton className="h-5 w-16 ml-auto" /></td>
+                  </tr>
+                ))
+              ) : positions.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-8 text-center text-muted-foreground italic">
                     No active positions. Open trades on the Dashboard to track them here.

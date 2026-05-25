@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useDashboard } from '@/app/context/DashboardContext';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function NewsPage() {
   const { watchlist } = useDashboard();
@@ -81,9 +82,24 @@ export default function NewsPage() {
 
       {/* Loading & News List */}
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-16 space-y-3">
-          <div className="h-8 w-8 rounded-full border-2 border-t-[#8b5cf6] border-[#1e1e3a] animate-spin" />
-          <p className="text-xs text-muted-foreground animate-pulse">Fetching latest telemetry and sentiment feeds...</p>
+        <div className="space-y-3">
+          {Array.from({ length: 3 }).map((_, idx) => (
+            <div key={idx} className="glass-card block transition-all duration-300">
+              <div className="flex flex-col sm:flex-row gap-4 items-stretch">
+                <Skeleton className="sm:w-36 h-24 shrink-0 rounded-lg" />
+                <div className="flex-1 flex flex-col justify-between min-w-0 py-1">
+                  <div>
+                    <Skeleton className="h-5 w-[90%] mb-2" />
+                    <Skeleton className="h-4 w-[60%] mb-2" />
+                  </div>
+                  <div className="flex items-center justify-between mt-auto pt-2">
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-4 w-16" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       ) : articles.length === 0 ? (
         <div className="glass-card-lg text-center py-12 text-muted-foreground italic">
