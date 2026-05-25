@@ -57,11 +57,36 @@ export default function LandingPage() {
   ];
 
   const pipelineSteps = [
-    { icon: Zap, label: 'TradingView' },
-    { icon: BarChart3, label: 'Foundry' },
-    { icon: Cpu, label: 'Make.com' },
-    { icon: TrendingUp, label: 'Cloudflare' },
-    { icon: Bell, label: 'OKX / Alpaca' },
+    { 
+      number: '01', 
+      icon: Zap, 
+      label: 'TradingView', 
+      desc: 'webhook triggers are generated in real-time from custom strategy indicators.' 
+    },
+    { 
+      number: '02', 
+      icon: BarChart3, 
+      label: 'Foundry Ontology', 
+      desc: 'payload is ingested, parsed, and logged persistently into global ontologies.' 
+    },
+    { 
+      number: '03', 
+      icon: Cpu, 
+      label: 'Make.com', 
+      desc: 'orchestrates the signal logic, checking parameters and validation policies.' 
+    },
+    { 
+      number: '04', 
+      icon: TrendingUp, 
+      label: 'Cloudflare Edge', 
+      desc: 'low-latency routing and secure API signature validation at closest edge nodes.' 
+    },
+    { 
+      number: '05', 
+      icon: Bell, 
+      label: 'Exchanges', 
+      desc: 'instant fills are executed via OKX (crypto) or Alpaca (stocks) API keys.' 
+    },
   ];
 
   return (
@@ -133,36 +158,43 @@ export default function LandingPage() {
 
       {/* Pipeline Diagram */}
       <section ref={pipelineRef as any} className="px-6 py-24 relative border-b border-[#1e1e3a]/20">
-        <div className="absolute inset-0 bg-grid-pattern opacity-30 pointer-events-none" />
-        <div className="mx-auto max-w-4xl space-y-8 relative z-10">
+        <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none" />
+        <div className="mx-auto max-w-6xl space-y-12 relative z-10">
           <div className="text-center space-y-3 reveal-inview">
+            <h2 className="text-xs font-bold uppercase tracking-[0.3em] text-[#8b5cf6]">Real-Time Processing Flow</h2>
             <h2 className="text-3xl font-bold font-[family-name:var(--font-display)] text-white">Autonomous Routing Pipeline</h2>
-          </div>
-          <div className="glass-card-lg !p-8 reveal-inview" style={{ transitionDelay: '150ms' }}>
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              {pipelineSteps.map((step, idx) => {
-                const Icon = step.icon;
-                return (
-                  <div key={step.label} className="flex items-center gap-4">
-                    <div className="flex flex-col items-center gap-2">
-                      <div className="rounded-xl p-3.5 animate-glow" style={{ background: 'rgba(139, 92, 246, 0.1)', border: '1px solid rgba(139, 92, 246, 0.2)' }}>
-                        <Icon className="h-6 w-6" style={{ color: '#8b5cf6' }} />
-                      </div>
-                      <span className="text-sm font-medium">{step.label}</span>
-                    </div>
-                    {idx < pipelineSteps.length - 1 && (
-                      <div className="hidden sm:block">
-                        <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-            <div className="gradient-divider mt-6 mb-4" />
-            <p className="text-sm text-muted-foreground">
-              Indicator webhooks trigger a secure execution pipeline. Signals are ingested via Foundry, parsed by automated orchestrators, validated at the edge using Cloudflare Workers, and instantly routed to target exchanges.
+            <p className="text-sm text-muted-foreground max-w-xl mx-auto">
+              Follow the journey of a trading signal from indicator validation to direct execution in milliseconds.
             </p>
+          </div>
+
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5 relative reveal-inview" style={{ transitionDelay: '150ms' }}>
+            {pipelineSteps.map((step, idx) => {
+              const Icon = step.icon;
+              return (
+                <div key={step.label} className="relative flex flex-col items-center text-center group">
+                  {/* Visual connector line between steps on desktop/large screens */}
+                  {idx < pipelineSteps.length - 1 && (
+                    <div className="hidden lg:block absolute top-10 left-[70%] w-[60%] h-[2px] bg-gradient-to-r from-[#8b5cf6]/40 to-transparent z-0 pointer-events-none" />
+                  )}
+                  
+                  {/* Step Node Circle */}
+                  <div className="relative z-10 mb-5 flex h-20 w-20 items-center justify-center rounded-2xl bg-[#0c0c1d] border border-[#1e1e3a] transition-all duration-300 group-hover:border-[#8b5cf6] group-hover:shadow-[0_0_20px_rgba(139,92,246,0.25)]">
+                    {/* Step Number Badge */}
+                    <span className="absolute -top-2.5 -left-2.5 flex h-6 w-6 items-center justify-center rounded-full bg-[#111128] border border-[#1e1e3a] text-[10px] font-bold text-[#8b5cf6] group-hover:bg-[#8b5cf6] group-hover:text-white group-hover:border-transparent transition-all duration-200">
+                      {step.number}
+                    </span>
+                    <Icon className="h-8 w-8 text-[#8b5cf6] transition-transform duration-300 group-hover:scale-110" />
+                  </div>
+
+                  {/* Title & Description */}
+                  <h3 className="relative z-10 font-bold text-white text-base mb-2 tracking-tight group-hover:text-[#8b5cf6] transition-colors duration-200">{step.label}</h3>
+                  <p className="relative z-10 text-xs text-muted-foreground leading-relaxed px-3">
+                    {step.desc}
+                  </p>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
