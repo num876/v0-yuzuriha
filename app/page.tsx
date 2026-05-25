@@ -234,7 +234,7 @@ export default function LandingPage() {
             <h2 className="text-xs font-bold uppercase tracking-[0.3em] text-[#8b5cf6]">Cryptographic Safety</h2>
             <h2 className="text-3xl font-bold font-display text-white">Institutional Security Architecture</h2>
             <p className="text-sm text-muted-foreground max-w-2xl mx-auto">
-              We enforce a zero-trust, non-custodial risk containment infrastructure designed to protect your API keys and isolate trading environments.
+              We enforce a zero-trust, non-custodial risk containment architecture designed to secure your exchange connections and isolate trading execution environments.
             </p>
           </div>
           
@@ -251,20 +251,20 @@ export default function LandingPage() {
                   <span className="text-xs font-mono text-muted-foreground">NODE: YUZ-SEC-01</span>
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-white font-display">Zero-Trust Key Enclave</h3>
+                  <h3 className="text-2xl font-bold text-white font-display">Zero-Trust Connection Enclave</h3>
                   <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-                    API integration endpoints are cryptographically isolated. Platform processes do not have the capability to initiate external withdrawals.
+                    Exchange integration endpoints are cryptographically isolated and hardware-secured. All execution routines operate under read-and-trade permissions with absolute isolation from capital withdrawals.
                   </p>
                 </div>
                 
                 <div className="space-y-2 border-t border-[#1e1e3a]/60 pt-4 font-mono text-[10px] text-muted-foreground">
                   <div className="flex justify-between">
-                    <span>ENCRYPTION</span>
-                    <span className="text-white">AES-256-GCM</span>
+                    <span>CONNECTION STATUS</span>
+                    <span className="text-white">SECURED (AES-256-GCM)</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>WITHDRAWAL CAPABILITY</span>
-                    <span className="text-red-500 font-semibold">DISABLED</span>
+                    <span>WITHDRAWAL ACCESS</span>
+                    <span className="text-red-500 font-semibold">INHERENTLY DISABLED</span>
                   </div>
                   <div className="flex justify-between">
                     <span>IP WHITELISTING</span>
@@ -282,7 +282,7 @@ export default function LandingPage() {
                 </div>
                 <div>
                   <div className="text-xs font-bold text-white font-mono">NON-CUSTODIAL</div>
-                  <div className="text-[10px] text-muted-foreground">100% Asset Ownership</div>
+                  <div className="text-[10px] text-muted-foreground">100% Capital Control</div>
                 </div>
               </div>
             </div>
@@ -295,9 +295,9 @@ export default function LandingPage() {
                   🔒
                 </div>
                 <div className="space-y-1">
-                  <h3 className="font-semibold text-white text-base">AES-256 Key Encryption</h3>
+                  <h3 className="font-semibold text-white text-base">Secure Connection Enclave</h3>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Exchange API secrets are encrypted at rest using industry-standard Advanced Encryption Standard (AES) with 256-bit key sizes. Decryption is isolated to runtime execution memory.
+                    All connection credentials are encrypted using industry-standard AES-256 at rest, with decryption strictly isolated to sandboxed runtime execution environments.
                   </p>
                 </div>
               </div>
@@ -307,9 +307,9 @@ export default function LandingPage() {
                   🛡️
                 </div>
                 <div className="space-y-1">
-                  <h3 className="font-semibold text-white text-base">Non-Custodial Design</h3>
+                  <h3 className="font-semibold text-white text-base">Non-Custodial Execution</h3>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Yuzuriha has zero withdrawal permissions. You remain in absolute control of your capital, limiting the platform to strictly defined trade execution and read-only telemetry.
+                    Yuzuriha operates under zero-custody constraints. The platform is restricted to execution and read-only telemetry, ensuring you maintain absolute control over your funds at all times.
                   </p>
                 </div>
               </div>
@@ -319,9 +319,9 @@ export default function LandingPage() {
                   ⚡
                 </div>
                 <div className="space-y-1">
-                  <h3 className="font-semibold text-white text-base">Cloudflare Edge Ingress</h3>
+                  <h3 className="font-semibold text-white text-base">Edge Validation Shield</h3>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    All incoming indicator webhooks are validated and sanitized at the Cloudflare network edge, instantly discarding unauthorized requests or replay attacks before database storage.
+                    All incoming execution telemetry is sanitized at the network edge, filtering out unauthorized calls and preventing replay attacks before reaching the core database.
                   </p>
                 </div>
               </div>
