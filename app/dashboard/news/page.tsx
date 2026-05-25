@@ -41,9 +41,9 @@ export default function NewsPage() {
   ];
 
   const sentimentConfig = {
-    positive: { bg: 'bg-success/10', text: 'text-success', label: 'Positive' },
-    negative: { bg: 'bg-destructive/10', text: 'text-destructive', label: 'Negative' },
-    neutral: { bg: 'bg-muted/10', text: 'text-muted-foreground', label: 'Neutral' },
+    positive: { bg: 'bg-success/10 border border-success/20 shadow-[0_0_8px_rgba(46,216,163,0.15)]', text: 'text-success', label: 'Positive' },
+    negative: { bg: 'bg-destructive/10 border border-destructive/20 shadow-[0_0_8px_rgba(239,68,68,0.15)]', text: 'text-destructive', label: 'Negative' },
+    neutral: { bg: 'bg-muted/10 border border-muted/20', text: 'text-muted-foreground', label: 'Neutral' },
   };
 
   return (
@@ -57,8 +57,8 @@ export default function NewsPage() {
 
       {/* Filter */}
       <div className="flex gap-2">
-        <Input placeholder="Search news..." className="max-w-xs" />
-        <select className="rounded-md border border-border bg-card px-3 py-2 text-sm">
+        <Input placeholder="Search news..." className="max-w-xs w-full rounded-xl border border-[#1e1e3a]/50 bg-[#111128]/80 px-3 py-2.5 text-sm transition-all duration-200 focus:border-[#8b5cf6]/50 focus:ring-1 focus:ring-[#8b5cf6]/20 hover:border-[#8b5cf6]/30 outline-none" />
+        <select className="rounded-xl border border-[#1e1e3a]/50 bg-[#111128]/80 px-3 py-2 text-sm focus:border-[#8b5cf6]/50 focus:ring-1 focus:ring-[#8b5cf6]/20 outline-none">
           <option>All assets</option>
           <option>BTC</option>
           <option>ETH</option>
@@ -71,7 +71,7 @@ export default function NewsPage() {
         {news.map((item) => {
           const sentiment = sentimentConfig[item.sentiment as keyof typeof sentimentConfig];
           return (
-            <div key={item.id} className="rounded-lg border border-border bg-card p-4 hover:border-accent/50 transition-colors cursor-pointer">
+            <div key={item.id} className="glass-card card-hover-lift glow-border hover:!border-[#8b5cf6]/30 cursor-pointer">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold leading-snug mb-2">{item.title}</h3>

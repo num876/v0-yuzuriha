@@ -12,7 +12,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-screen flex-col">
       {/* Top Navigation Bar */}
-      <div className="flex items-center border-b border-border bg-card px-4 py-3 lg:hidden">
+      <div
+        className="flex items-center border-b border-[#1e1e3a]/30 px-4 py-3 lg:hidden"
+        style={{ background: 'rgba(5, 5, 16, 0.95)' }}
+      >
         <Button
           variant="ghost"
           size="sm"
@@ -39,7 +42,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               onClose={() => setSidebarOpen(false)}
             />
             <div
-              className="flex-1 bg-black/50"
+              className="flex-1 bg-black/60 backdrop-blur-sm"
               onClick={() => setSidebarOpen(false)}
             />
           </div>
@@ -48,7 +51,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         {/* Main Content */}
         <div className="flex flex-1 flex-col overflow-hidden">
           <TopBar />
-          <main className="flex-1 overflow-auto">
+          <main className="flex-1 overflow-auto bg-grid-pattern" style={{ transform: 'translateZ(0)', WebkitOverflowScrolling: 'touch', contain: 'paint' }}>
             {children}
           </main>
         </div>

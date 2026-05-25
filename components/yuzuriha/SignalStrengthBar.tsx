@@ -14,9 +14,9 @@ export function SignalStrengthBar({
   const percentage = Math.min(Math.max(confidence, 0), 100);
   
   const getColor = () => {
-    if (percentage >= 75) return 'bg-success';
-    if (percentage >= 50) return 'bg-warning';
-    return 'bg-destructive';
+    if (percentage >= 75) return 'bg-success shadow-[0_0_12px_rgba(34,197,94,0.4)]';
+    if (percentage >= 50) return 'bg-warning shadow-[0_0_12px_rgba(245,158,11,0.4)]';
+    return 'bg-destructive shadow-[0_0_12px_rgba(239,68,68,0.4)]';
   };
 
   const getLabel = () => {
@@ -31,10 +31,10 @@ export function SignalStrengthBar({
         <span className="text-xs font-medium text-muted-foreground">{label}</span>
         <span className="text-xs font-bold text-foreground">{percentage}%</span>
       </div>
-      <div className="h-2 w-full rounded-full bg-border overflow-hidden">
+      <div className="h-2 w-full rounded-full bg-[#1e1e3a] overflow-hidden">
         <div
-          className={cn('h-full transition-all duration-300', getColor())}
-          style={{ width: `${percentage}%` }}
+          className={cn('h-full rounded-full transition-all duration-300', getColor())}
+          style={{ width: `${percentage}%`, animation: 'barFill 1s ease-out' }}
         />
       </div>
       <span className="text-xs text-muted-foreground">{getLabel()} signal</span>

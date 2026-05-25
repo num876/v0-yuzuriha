@@ -2,305 +2,566 @@
 
 import { useDashboard } from '@/app/context/DashboardContext';
 import { usePrices } from '@/app/context/PriceContext';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { MetricStat } from '@/components/yuzuriha/MetricStat';
-import { SignalStrengthBar } from '@/components/yuzuriha/SignalStrengthBar';
 import { PriceDisplay } from '@/components/yuzuriha/PriceDisplay';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Zap, TrendingUp, TrendingDown } from 'lucide-react';
+import { Zap, Clock, ShieldAlert, CheckCircle, Trash2, Download } from 'lucide-react';
+import { TradingViewChart } from '@/components/yuzuriha/TradingViewChart';
 
 export default function DashboardPage() {
-  const { watchlist } = useDashboard();
+  const { 
+    watchlist, 
+    activeSignals, 
+    scheduledTrades, 
+    addScheduledTrade, 
+    deleteScheduledTrade,
+    addActiveSignal,
+    clearTrades,
+    settings
+  } = useDashboard();
   const { subscribe, getPrice } = usePrices();
+
+  // Selected Asset state
+  const [selectedAsset, setSelectedAsset] = useState('BTC');
+
+  // Input states
+  const [buyTimeframe, setBuyTimeframe] = useState('15m');
+  const [buySize, setBuySize] = useState('100');
+  const [sellTimeframe, setSellTimeframe] = useState('1h');
+  const [sellSize, setSellSize] = useState('100');
+  const [selectedFramework, setSelectedFramework] = useState('Al Brooks');
+
+  // Confirmation Modal state
+  const [showLiveConfirm, setShowLiveConfirm] = useState(false);
+  const [pendingTrade, setPendingTrade] = useState<any>(null);
 
   // Subscribe to watchlist prices
   useEffect(() => {
     subscribe(watchlist);
-  }, [watchlist, subscribe]);
+    if (watchlist.length > 0 && !watchlist.includes(selectedAsset)) {
+      setSelectedAsset(watchlist[0]);
+    }
+  }, [watchlist, subscribe, selectedAsset]);
 
-  const selectedAsset = watchlist[0] || 'BTC';
   const price = getPrice(selectedAsset);
+  const currentPriceValue = price ? price.current : 82410;
 
-  // Mock stats
-  const stats = {
-    totalPnl: 2847.50,
-    pnlPercent: 12.4,
-    winRate: 68.5,
-    trades: 21,
-    signals: 156,
-    activeSignals: 5,
+  // Handle Immediate Trade execution
+  const handleExecuteTrade = (side: 'buy' | 'sell') => {
+    const sizeVal = side === 'buy' ? Number(buySize) : Number(sellSize);
+    const timeframeVal = side === 'buy' ? buyTimeframe : sellTimeframe;
+
+    const tradePayload = {
+      pair: `${selectedAsset}-USDT`,
+      side,
+      positionSize: sizeVal,
+      price: currentPriceValue,
+      timeframe: timeframeVal,
+      exchange: settings.isLiveTrading ? 'Live Exchange' : 'OKX Demo',
+      confidence: 85,
+      reasoning: `Manual execution under ${selectedFramework} framework`,
+      framework: selectedFramework,
+      assetClass: ['AAPL', 'TSLA', 'NVDA', 'MSFT', 'AMZN'].includes(selectedAsset) ? 'stock' : 'crypto',
+    };
+
+    if (settings.isLiveTrading) {
+      setPendingTrade(tradePayload);
+      setShowLiveConfirm(true);
+    } else {
+      addActiveSignal(tradePayload as any);
+    }
+  };
+
+  // Handle Scheduled Trade
+  const handleScheduleTrade = (side: 'buy' | 'sell') => {
+    const sizeVal = side === 'buy' ? Number(buySize) : Number(sellSize);
+    const timeframeVal = side === 'buy' ? buyTimeframe : sellTimeframe;
+
+    addScheduledTrade({
+      id: '',
+      pair: `${selectedAsset}-USDT`,
+      side,
+      timeframe: timeframeVal,
+      positionSize: sizeVal,
+      createdAt: new Date().toISOString(),
+      framework: selectedFramework,
+      assetClass: ['AAPL', 'TSLA', 'NVDA', 'MSFT', 'AMZN'].includes(selectedAsset) ? 'stock' : 'crypto',
+      exchange: settings.isLiveTrading ? 'Live Exchange' : 'OKX Demo',
+    });
+
+    alert(`Pre-scheduled trade queued! Waiting for ${selectedAsset}-USDT ${timeframeVal} TradingView signal to trigger.`);
+  };
+
+  const confirmLiveTrade = () => {
+    if (pendingTrade) {
+      addActiveSignal(pendingTrade);
+      setPendingTrade(null);
+    }
+    setShowLiveConfirm(false);
+  };
+
+  // Calculate stats
+  const totalTrades = activeSignals.length;
+  const winRate = totalTrades > 0 
+    ? Math.round((activeSignals.filter(t => (t.pnl || 0) >= 0).length / totalTrades) * 100) 
+    : 0;
+  const totalPnl = activeSignals.reduce((acc, t) => acc + (t.pnl || 0), 0);
+
+  // Coinly CSV export
+  const exportToCoinly = () => {
+    if (activeSignals.length === 0) {
+      alert('No trades available to export.');
+      return;
+    }
+
+    const headers = [
+      'Date',
+      'Sent Amount',
+      'Sent Currency',
+      'Received Amount',
+      'Received Currency',
+      'Fee Amount',
+      'Fee Currency',
+      'Label',
+      'Description',
+      'TxHash',
+      'Exchange'
+    ];
+
+    const rows = activeSignals.map(trade => {
+      const isBuy = trade.side === 'buy';
+      // Coinly format mapping:
+      // For BUY: we send USDT (size), receive BTC (size/price)
+      // For SELL: we send BTC (size/price), receive USDT (size)
+      const baseAsset = trade.pair.split('-')[0];
+      const quoteAsset = 'USDT';
+      const sizeQuote = trade.size;
+      const sizeBase = trade.size / trade.price;
+
+      const sentAmount = isBuy ? sizeQuote : sizeBase;
+      const sentCurrency = isBuy ? quoteAsset : baseAsset;
+      const receivedAmount = isBuy ? sizeBase : sizeQuote;
+      const receivedCurrency = isBuy ? baseAsset : quoteAsset;
+
+      return [
+        new Date(trade.executedAt).toISOString(),
+        sentAmount.toFixed(6),
+        sentCurrency,
+        receivedAmount.toFixed(6),
+        receivedCurrency,
+        '0.00',
+        quoteAsset,
+        isBuy ? 'Buy' : 'Sell',
+        `Yuzuriha automated execution under ${trade.timeframe} timeframe`,
+        trade.id,
+        trade.exchange
+      ];
+    });
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(val => `"${val}"`).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `yuzuriha_coinly_export_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
-    <div className="h-full overflow-auto">
+    <div className="h-full overflow-auto bg-[#050510] pb-12">
       {/* Gradient divider for visual rhythm */}
       <div className="gradient-divider h-px" />
-      
-      {/* 3-Column Grid Layout */}
-      <div className="grid h-full grid-cols-1 gap-6 p-6 lg:grid-cols-12">
-        {/* LEFT COLUMN - Strong Signals & Watchlist */}
-        <div className="flex flex-col gap-6 lg:col-span-3">
-          {/* Strong Signals */}
-          <div className="glass-card">
-            <h2 className="mb-4 text-sm font-bold uppercase tracking-wider text-muted-foreground">
-              Strong signals
-            </h2>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between rounded-lg border border-success/30 bg-success/10 backdrop-blur-sm p-3 transition-all duration-200 ease-in-out hover:bg-success/20 hover:border-success/50">
-                <div>
-                  <div className="text-sm font-semibold">BTC/USDT</div>
-                  <div className="text-xs text-muted-foreground">1h timeframe</div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4 text-success" />
-                  <span className="text-xs font-bold text-success">85%</span>
-                </div>
-              </div>
-              <div className="flex items-center justify-between rounded-lg border border-destructive/30 bg-destructive/10 backdrop-blur-sm p-3 transition-all duration-200 ease-in-out hover:bg-destructive/20 hover:border-destructive/50">
-                <div>
-                  <div className="text-sm font-semibold">ETH/USDT</div>
-                  <div className="text-xs text-muted-foreground">4h timeframe</div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <TrendingDown className="h-4 w-4 text-destructive" />
-                  <span className="text-xs font-bold text-destructive">72%</span>
-                </div>
-              </div>
-            </div>
-          </div>
 
-          {/* Watch list */}
-          <div className="glass-card">
-            <h2 className="mb-4 text-sm font-bold uppercase tracking-wider text-muted-foreground">
-              Prices
-            </h2>
-            <div className="space-y-3">
-              {watchlist.slice(0, 5).map((symbol) => {
-                const p = getPrice(symbol);
-                return (
-                  <div
-                    key={symbol}
-                    className="flex items-start justify-between rounded-lg border border-border bg-secondary p-2 cursor-pointer hover:bg-secondary/80 transition-colors"
-                  >
-                    <div>
-                      <div className="font-mono text-sm font-bold">{symbol}</div>
-                      <div className="text-xs text-muted-foreground">
-                        ${p?.current.toFixed(2) || '---'}
-                      </div>
-                    </div>
-                    <div className={`text-xs font-semibold ${p?.changePercent24h ?? 0 >= 0 ? 'text-success' : 'text-destructive'}`}>
-                      {p?.changePercent24h ?? 0 >= 0 ? '+' : ''}{p?.changePercent24h?.toFixed(2) || '0.00'}%
-                    </div>
-                  </div>
-                );
-              })}
+      {/* Confirmation Modal */}
+      {showLiveConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="glass-card-lg max-w-md w-full p-6 border-red-500/40 bg-[#0d0d1e] shadow-[0_0_50px_rgba(239,68,68,0.25)] space-y-4 text-left">
+            <div className="flex items-center gap-3 text-red-500">
+              <ShieldAlert className="h-8 w-8 animate-bounce" />
+              <h3 className="text-xl font-bold">Confirm Live Order Execution</h3>
+            </div>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              WARNING: You are about to place a real order on your live exchange for **{pendingTrade?.pair}**. Real money will be spent. Proceed?
+            </p>
+            <div className="flex justify-end gap-3 pt-2">
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setShowLiveConfirm(false);
+                  setPendingTrade(null);
+                }}
+                className="border-[#1e1e3a] text-white hover:bg-white/5"
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={confirmLiveTrade}
+                className="bg-red-500 hover:bg-red-600 text-white font-bold"
+              >
+                Confirm Order
+              </Button>
             </div>
           </div>
         </div>
-
-        {/* MIDDLE COLUMN - Trading Interface */}
-        <div className="flex flex-col gap-6 lg:col-span-5">
+      )}
+      
+      {/* 2-Column Grid Layout */}
+      <div className="grid h-full grid-cols-1 gap-6 p-6 lg:grid-cols-12">
+        
+        {/* LEFT COLUMN - Symbol Header, Live Chart, Forms (col-span-8) */}
+        <div className="flex flex-col gap-6 lg:col-span-8">
+          
           {/* Asset Header */}
-          <div className="glass-card-lg">
-            <div className="mb-4 flex items-start justify-between">
+          <div className="glass-card-lg !p-5">
+            <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold">{selectedAsset}</h1>
-                <p className="text-xs text-muted-foreground">Live price from CoinGecko</p>
+                <div className="flex items-center gap-2">
+                  <select 
+                    value={selectedAsset}
+                    onChange={(e) => setSelectedAsset(e.target.value)}
+                    className="text-3xl font-bold font-mono tracking-tight text-white bg-transparent border-0 outline-none cursor-pointer focus:ring-0"
+                  >
+                    {watchlist.map(symbol => (
+                      <option key={symbol} value={symbol} className="bg-[#0c0c1d] text-white text-base">
+                        {symbol} / USDT
+                      </option>
+                    ))}
+                  </select>
+                  <span className="rounded border border-[#1e1e3a] bg-[#111128]/50 px-2 py-0.5 text-[10px] font-bold text-muted-foreground uppercase">
+                    {['AAPL', 'TSLA', 'NVDA', 'MSFT', 'AMZN'].includes(selectedAsset) ? 'Stock' : 'Crypto'}
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Real-time pricing feed synchronized client-side (5s updates)
+                </p>
               </div>
-              <div className="text-right">
-                {price ? (
-                  <PriceDisplay
-                    price={price.current}
-                    change24h={price.current * (price.changePercent24h / 100)}
-                    changePercent24h={price.changePercent24h}
-                  />
-                ) : (
-                  <div className="text-sm text-muted-foreground animate-pulse">
-                    Loading price...
-                  </div>
-                )}
+
+              <div className="flex items-center gap-6 ml-auto">
+                <div className="text-right">
+                  {price ? (
+                    <PriceDisplay
+                      price={price.current}
+                      change24h={price.change24h}
+                      changePercent24h={price.changePercent24h}
+                    />
+                  ) : (
+                    <div className="text-sm text-muted-foreground animate-pulse">
+                      Loading price...
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Button 
+                    onClick={() => handleExecuteTrade('buy')}
+                    className="bg-[#22c55e] hover:bg-[#22c55e]/90 text-white font-bold px-4 py-2 rounded-lg text-sm transition-all shadow-[0_0_12px_rgba(34,197,94,0.2)] border-0"
+                  >
+                    Buy Now
+                  </Button>
+                  <Button 
+                    onClick={() => handleExecuteTrade('sell')}
+                    className="bg-[#ef4444] hover:bg-[#ef4444]/90 text-white font-bold px-4 py-2 rounded-lg text-sm transition-all shadow-[0_0_12px_rgba(239,68,68,0.2)] border-0"
+                  >
+                    Sell Now
+                  </Button>
+                </div>
               </div>
             </div>
+          </div>
 
-            {/* Signal Strength */}
-            <div className="mb-6">
-              <SignalStrengthBar confidence={85} label="TradingView signal" />
+          {/* Live TradingView Chart */}
+          <TradingViewChart symbol={selectedAsset} />
+
+          {/* Claude AI Analysis Card */}
+          <div className="glass-card !border-[#8b5cf6]/20 hover:!border-[#8b5cf6]/40 animate-glow flex gap-4">
+            <div className="rounded-lg p-2 bg-[#8b5cf6]/10 text-[#8b5cf6] h-fit">
+              <Zap className="h-5 w-5 animate-pulse" />
             </div>
-
-            {/* Buy/Sell Tabs */}
-            <Tabs defaultValue="buy" className="mb-6">
-              <TabsList className="grid w-full grid-cols-2 bg-secondary/50 backdrop-blur-sm">
-                <TabsTrigger value="buy">Buy</TabsTrigger>
-                <TabsTrigger value="sell">Sell</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="buy" className="space-y-4 mt-4">
-                <div>
-                  <label className="block text-xs font-medium mb-2 text-muted-foreground">
-                    Timeframe
-                  </label>
-                  <select className="w-full rounded-md border border-border/50 bg-secondary/50 backdrop-blur-sm px-3 py-2 text-sm transition-all duration-200 ease-in-out hover:border-accent/50">
-                    <option>1m</option>
-                    <option>5m</option>
-                    <option>15m</option>
-                    <option selected>1h</option>
-                    <option>4h</option>
-                    <option>1d</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-medium mb-2 text-muted-foreground">
-                    Position size
-                  </label>
-                  <input
-                    type="number"
-                    placeholder="0.00"
-                    defaultValue="1.0"
-                    className="w-full rounded-md border border-border/50 bg-secondary/50 backdrop-blur-sm px-3 py-2 text-sm transition-all duration-200 ease-in-out hover:border-accent/50"
-                  />
-                </div>
-                <Button className="w-full gap-2 bg-success hover:bg-success/90 btn-particle-hover">
-                  <Zap className="h-4 w-4" />
-                  Pre-schedule buy
-                </Button>
-              </TabsContent>
-
-              <TabsContent value="sell" className="space-y-4 mt-4">
-                <div>
-                  <label className="block text-xs font-medium mb-2 text-muted-foreground">
-                    Timeframe
-                  </label>
-                  <select className="w-full rounded-md border border-border/50 bg-secondary/50 backdrop-blur-sm px-3 py-2 text-sm transition-all duration-200 ease-in-out hover:border-accent/50">
-                    <option>1m</option>
-                    <option>5m</option>
-                    <option>15m</option>
-                    <option selected>1h</option>
-                    <option>4h</option>
-                    <option>1d</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-medium mb-2 text-muted-foreground">
-                    Position size
-                  </label>
-                  <input
-                    type="number"
-                    placeholder="0.00"
-                    defaultValue="1.0"
-                    className="w-full rounded-md border border-border bg-secondary px-3 py-2 text-sm"
-                  />
-                </div>
-                <Button className="w-full gap-2 bg-destructive hover:bg-destructive/90">
-                  <Zap className="h-4 w-4" />
-                  Pre-schedule sell
-                </Button>
-              </TabsContent>
-            </Tabs>
-
-            {/* Claude Analysis */}
-            <div className="glass-card border-accent/20 hover:border-accent/40">
-              <h3 className="mb-2 text-sm font-semibold flex items-center gap-2">
-                <Zap className="h-4 w-4 text-accent" />
-                Claude AI analysis
+            <div>
+              <h3 className="font-semibold text-sm mb-1 text-white">
+                Claude AI analysis ({selectedFramework})
               </h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Strong bullish momentum on the 1h timeframe. Multiple confluence factors: price above key moving average, RSI in overbought territory with potential rejection. Recommend awaiting pullback to support zone before entering. Confidence: 78%.
+                ANALYSIS METADATA: High confidence buy momentum detected on {selectedAsset} indicators. Moving average crossovers show bullish alignment under {selectedFramework}. Strategy recommendation: execute trades at or above autopilot threshold ({settings.autopilotThreshold}%).
               </p>
             </div>
           </div>
 
-          {/* Chart Placeholder */}
-          <div className="glass-card-lg h-64 flex items-center justify-center">
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground">
-                TradingView chart embed
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Configure in settings
-              </p>
+          {/* Framework Selector Bar */}
+          <div className="glass-card flex items-center justify-between gap-4 p-4">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Trading Framework:</span>
+            <select 
+              value={selectedFramework}
+              onChange={(e) => setSelectedFramework(e.target.value)}
+              className="rounded-xl border border-[#1e1e3a]/50 bg-[#111128]/80 px-3 py-2 text-xs text-white focus:border-[#8b5cf6]/50 focus:ring-1 focus:ring-[#8b5cf6]/20 outline-none"
+            >
+              <option>Al Brooks</option>
+              <option>ICT/Smart Money Concepts</option>
+              <option>Wyckoff Method</option>
+              <option>Elliott Wave</option>
+            </select>
+          </div>
+
+          {/* Buy/Sell Timeframes Forms */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Buy Settings */}
+            <div className="glass-card flex flex-col gap-4">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                Buy Timeframe
+              </h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-medium mb-1.5 text-muted-foreground">
+                    Timeframe
+                  </label>
+                  <select 
+                    value={buyTimeframe}
+                    onChange={(e) => setBuyTimeframe(e.target.value)}
+                    className="w-full rounded-xl border border-[#1e1e3a]/50 bg-[#111128]/80 px-3 py-2.5 text-xs text-white focus:border-[#8b5cf6]/50 focus:ring-1 focus:ring-[#8b5cf6]/20 hover:border-[#8b5cf6]/30 outline-none"
+                  >
+                    <option value="1m">1m</option>
+                    <option value="5m">5m</option>
+                    <option value="15m">15m</option>
+                    <option value="1h">1h</option>
+                    <option value="4h">4h</option>
+                    <option value="1d">1d</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium mb-1.5 text-muted-foreground">
+                    Order Size ($)
+                  </label>
+                  <input
+                    type="number"
+                    value={buySize}
+                    onChange={(e) => setBuySize(e.target.value)}
+                    className="w-full rounded-xl border border-[#1e1e3a]/50 bg-[#111128]/80 px-3 py-2.5 text-xs text-white focus:border-[#8b5cf6]/50 focus:ring-1 focus:ring-[#8b5cf6]/20 hover:border-[#8b5cf6]/30 outline-none"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={() => handleExecuteTrade('buy')}
+                    className="flex-1 btn-glow-green text-white border-0 py-2.5 rounded-xl font-bold text-xs"
+                  >
+                    Execute Buy
+                  </Button>
+                  <Button 
+                    onClick={() => handleScheduleTrade('buy')}
+                    className="bg-transparent border border-[#1e1e3a] hover:bg-white/5 text-white py-2.5 rounded-xl font-bold text-xs flex items-center gap-1"
+                  >
+                    <Clock className="h-3 w-3" /> Schedule
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Sell Settings */}
+            <div className="glass-card flex flex-col gap-4">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                Sell Timeframe (Can Differ)
+              </h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-medium mb-1.5 text-muted-foreground">
+                    Timeframe
+                  </label>
+                  <select 
+                    value={sellTimeframe}
+                    onChange={(e) => setSellTimeframe(e.target.value)}
+                    className="w-full rounded-xl border border-[#1e1e3a]/50 bg-[#111128]/80 px-3 py-2.5 text-xs text-white focus:border-[#8b5cf6]/50 focus:ring-1 focus:ring-[#8b5cf6]/20 hover:border-[#8b5cf6]/30 outline-none"
+                  >
+                    <option value="1m">1m</option>
+                    <option value="5m">5m</option>
+                    <option value="15m">15m</option>
+                    <option value="1h">1h</option>
+                    <option value="4h">4h</option>
+                    <option value="1d">1d</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium mb-1.5 text-muted-foreground">
+                    Order Size ($)
+                  </label>
+                  <input
+                    type="number"
+                    value={sellSize}
+                    onChange={(e) => setSellSize(e.target.value)}
+                    className="w-full rounded-xl border border-[#1e1e3a]/50 bg-[#111128]/80 px-3 py-2.5 text-xs text-white focus:border-[#8b5cf6]/50 focus:ring-1 focus:ring-[#8b5cf6]/20 hover:border-[#8b5cf6]/30 outline-none"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={() => handleExecuteTrade('sell')}
+                    className="flex-1 bg-gradient-to-r from-[#ef4444] to-[#dc2626] hover:shadow-[0_0_20px_rgba(239,68,68,0.3)] text-white border-0 py-2.5 rounded-xl font-bold text-xs transition-all duration-300"
+                  >
+                    Execute Sell
+                  </Button>
+                  <Button 
+                    onClick={() => handleScheduleTrade('sell')}
+                    className="bg-transparent border border-[#1e1e3a] hover:bg-white/5 text-white py-2.5 rounded-xl font-bold text-xs flex items-center gap-1"
+                  >
+                    <Clock className="h-3 w-3" /> Schedule
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* RIGHT COLUMN - Active Signals & Stats */}
+        {/* RIGHT COLUMN - Signals, Executions, Stats, Alerts (col-span-4) */}
         <div className="flex flex-col gap-6 lg:col-span-4">
-          {/* Active Signals */}
-          <div className="glass-card">
-            <h2 className="mb-4 text-sm font-bold uppercase tracking-wider text-muted-foreground">
-              Waiting to execute
-            </h2>
-            <div className="space-y-2 max-h-48 overflow-y-auto">
-              <div className="flex items-center justify-between rounded-lg border border-success/30 bg-success/10 backdrop-blur-sm p-3 transition-all duration-200 ease-in-out hover:bg-success/20">
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold">SOL/USDT</div>
-                  <div className="text-xs text-muted-foreground">Buy • 1.5 SOL</div>
-                </div>
-                <Button size="sm" variant="ghost" className="h-6 px-2 text-xs hover:bg-success/30">
-                  Execute
+          
+          {/* Active Signals (Executed Trades) */}
+          <div className="glass-card max-h-[300px] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                Active Signals (Executed)
+              </h2>
+              {activeSignals.length > 0 && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={exportToCoinly}
+                  className="h-7 text-[10px] border-[#1e1e3a] hover:bg-white/5 flex items-center gap-1 text-white"
+                >
+                  <Download className="h-3 w-3" /> Coinly Export
                 </Button>
-              </div>
-              <div className="flex items-center justify-between rounded-lg border border-destructive/30 bg-destructive/10 backdrop-blur-sm p-3 transition-all duration-200 ease-in-out hover:bg-destructive/20">
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold">XRP/USDT</div>
-                  <div className="text-xs text-muted-foreground">Sell • 50 XRP</div>
-                </div>
-                <Button size="sm" variant="ghost" className="h-6 px-2 text-xs hover:bg-destructive/30">
-                  Execute
-                </Button>
-              </div>
+              )}
             </div>
+            {activeSignals.length === 0 ? (
+              <p className="text-xs text-muted-foreground italic leading-normal">
+                Zero active market signals detected.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {activeSignals.map((trade) => (
+                  <div key={trade.id} className="rounded-xl border border-[#1e1e3a]/40 bg-[#111128]/30 p-3 text-xs flex flex-col gap-1">
+                    <div className="flex justify-between items-center">
+                      <span className="font-mono font-bold text-white">{trade.pair}</span>
+                      <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${trade.side === 'buy' ? 'bg-success/15 text-success' : 'bg-destructive/15 text-destructive'}`}>
+                        {trade.side.toUpperCase()}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-muted-foreground text-[11px]">
+                      <span>Price: ${trade.price.toLocaleString()}</span>
+                      <span>Size: ${trade.size}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-[10px] pt-1 border-t border-[#1e1e3a]/20">
+                      <span className="text-muted-foreground">{new Date(trade.executedAt).toLocaleTimeString()}</span>
+                      <span className="text-[#06b6d4] font-mono">{trade.exchange}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Waiting to Execute (Scheduled Trades) */}
+          <div className="glass-card max-h-[250px] overflow-y-auto">
+            <h2 className="mb-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              Waiting to Execute (Pre-scheduled)
+            </h2>
+            {scheduledTrades.length === 0 ? (
+              <p className="text-xs text-muted-foreground italic leading-normal">
+                No orders queued for execution.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {scheduledTrades.map((trade) => (
+                  <div key={trade.id} className="rounded-xl border border-[#1e1e3a]/40 bg-[#111128]/30 p-3 text-xs flex flex-col gap-1">
+                    <div className="flex justify-between items-center">
+                      <span className="font-mono font-bold text-white">{trade.pair}</span>
+                      <div className="flex items-center gap-2">
+                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${trade.side === 'buy' ? 'bg-success/15 text-success' : 'bg-destructive/15 text-destructive'}`}>
+                          {trade.side.toUpperCase()}
+                        </span>
+                        <button 
+                          onClick={() => deleteScheduledTrade(trade.id)}
+                          className="text-muted-foreground hover:text-red-500 transition-colors"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="flex justify-between text-muted-foreground text-[11px]">
+                      <span>Timeframe: {trade.timeframe}</span>
+                      <span>Target: ${trade.positionSize}</span>
+                    </div>
+                    <div className="text-[10px] text-[#8b5cf6] font-semibold">
+                      Trigger Framework: {trade.framework}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Performance Stats */}
-          <div className="space-y-3">
-            <MetricStat
-              label="Total PNL"
-              value={`$${stats.totalPnl.toLocaleString()}`}
-              change={stats.pnlPercent}
-              isPositive={true}
-            />
-            <MetricStat
-              label="Win rate"
-              value={`${stats.winRate}%`}
-              change={2.3}
-              isPositive={true}
-            />
-            <MetricStat
-              label="Closed trades"
-              value={stats.trades}
-            />
-            <MetricStat
-              label="Total signals"
-              value={stats.signals}
-            />
-            <MetricStat
-              label="Active signals"
-              value={stats.activeSignals}
-            />
+          <div className="glass-card">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                Portfolio Performance Statistics
+              </h2>
+              <button 
+                onClick={clearTrades}
+                className="text-[10px] text-muted-foreground hover:text-destructive font-semibold flex items-center gap-1 transition-colors"
+              >
+                🗑️ Clear History
+              </button>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <MetricStat
+                label="Total PNL Today"
+                value={totalPnl >= 0 ? `+$${totalPnl.toFixed(2)}` : `-$${Math.abs(totalPnl).toFixed(2)}`}
+                change={totalPnl}
+                isPositive={totalPnl >= 0}
+              />
+              <MetricStat
+                label="Win rate"
+                value={`${winRate}%`}
+                change={0}
+                isPositive={true}
+              />
+              <MetricStat
+                label="Active signals"
+                value={activeSignals.length}
+              />
+              <MetricStat
+                label="Total trades"
+                value={totalTrades}
+              />
+            </div>
           </div>
 
-          {/* Market Overview */}
-          <div className="rounded-lg border border-border bg-card p-4">
-            <h2 className="mb-4 text-sm font-bold uppercase tracking-wider text-muted-foreground">
-              Market overview
+          {/* Notifications Feed */}
+          <div className="glass-card">
+            <h2 className="mb-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              Notifications Feed
             </h2>
-            <div className="space-y-2 text-xs">
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">BTC dominance</span>
-                <span className="font-semibold">45.2%</span>
+            <div className="space-y-3">
+              <div className="rounded-xl border border-[#1e1e3a]/40 bg-[#111128]/30 p-3 text-xs text-muted-foreground">
+                <div className="font-semibold text-foreground mb-1 text-[11px]">LARGE-VALUE FLOW</div>
+                10,000 ETH ($34.8M) transferred from unknown wallet to OKX
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Fear & Greed</span>
-                <span className="font-semibold">67 (Greedy)</span>
+              <div className="rounded-xl border border-[#1e1e3a]/40 bg-[#111128]/30 p-3 text-xs text-muted-foreground">
+                <div className="font-semibold text-foreground mb-1 text-[11px]">COUNTERPARTY WATCH</div>
+                Wintermute deposited $12M of SOL to Binance
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">24h volume</span>
-                <span className="font-semibold">$89.2B</span>
+              <div className="rounded-xl border border-[#1e1e3a]/40 bg-[#111128]/30 p-3 text-xs text-muted-foreground">
+                <div className="font-semibold text-foreground mb-1 text-[11px]">EXTERNAL TELEMETRY</div>
+                BTC breakout above $67k confirmed on 1h
               </div>
             </div>
           </div>
         </div>
+        
       </div>
     </div>
   );

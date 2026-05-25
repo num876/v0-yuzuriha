@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 
 export interface Signal {
   id: string;
@@ -9,15 +9,25 @@ export interface Signal {
   type: 'buy' | 'sell';
   confidence: number;
   price: number;
-  timestamp: Date;
+  timestamp: Date | string;
   strength: 'strong' | 'medium' | 'weak';
   assetClass?: 'crypto' | 'stock' | 'commodity';
+  reasoning?: string;
+  status?: 'pending' | 'executed' | 'skipped';
 }
 
-export interface ActiveSignal extends Signal {
-  positionSize: number;
-  entryPrice: number;
-  status: 'executing' | 'active' | 'completed';
+export interface ActiveSignal {
+  id: string;
+  pair: string;
+  side: 'buy' | 'sell';
+  size: number;
+  price: number;
+  timeframe: string;
+  exchange: string;
+  confidence: number;
+  reasoning: string;
+  executedAt: string;
+  status: string;
   pnl?: number;
   pnlPercent?: number;
 }
@@ -28,57 +38,224 @@ export interface ScheduledTrade {
   side: 'buy' | 'sell';
   timeframe: string;
   positionSize: number;
-  createdAt: Date;
+  createdAt: Date | string;
   framework: string;
   assetClass?: 'crypto' | 'stock' | 'commodity';
   exchange?: string;
 }
 
+export interface Settings {
+  autopilotThreshold: number;
+  okxApiKey: string;
+  alpacaApiKey: string;
+  oandaApiKey: string;
+  oandaAccountId: string;
+  oandaEnvironment: string;
+  telegramToken: string;
+  telegramChatId: string;
+  framework: string;
+  notificationEmail: string;
+  isLiveTrading: boolean;
+  mexcApiKey?: string;
+  mexcSecretKey?: string;
+}
+
 interface DashboardContextType {
   signals: Signal[];
-  activeSignals: Map<string, ActiveSignal>;
-  scheduledTrades: Map<string, ScheduledTrade>;
+  activeSignals: ActiveSignal[];
+  scheduledTrades: ScheduledTrade[];
   watchlist: string[];
-  addSignal: (signal: Signal) => void;
-  addActiveSignal: (signal: ActiveSignal) => void;
-  addScheduledTrade: (trade: ScheduledTrade) => void;
+  settings: Settings;
+  addSignal: (signal: Signal) => Promise<void>;
+  addActiveSignal: (signal: ActiveSignal) => Promise<void>;
+  addScheduledTrade: (trade: ScheduledTrade) => Promise<void>;
+  deleteScheduledTrade: (id: string) => Promise<void>;
   addToWatchlist: (symbol: string) => void;
   removeFromWatchlist: (symbol: string) => void;
   getSignalsByPair: (pair: string) => Signal[];
+  updateSettings: (newSettings: Partial<Settings>) => Promise<void>;
+  refreshData: () => Promise<void>;
+  clearTrades: () => Promise<void>;
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
 
+// Default Watchlist assets (Crypto + Stocks combined)
+const DEFAULT_WATCHLIST = [
+  'BTC', 'ETH', 'DOGE', 'SOL', 'XRP', 'AVAX', 'LINK', 'ADA', 'DOT', 'MATIC', // Crypto
+  'AAPL', 'TSLA', 'NVDA', 'MSFT', 'AMZN' // Stocks
+];
+
 export function DashboardProvider({ children }: { children: ReactNode }) {
   const [signals, setSignals] = useState<Signal[]>([]);
-  const [activeSignals, setActiveSignals] = useState<Map<string, ActiveSignal>>(new Map());
-  const [scheduledTrades, setScheduledTrades] = useState<Map<string, ScheduledTrade>>(new Map());
-  const [watchlist, setWatchlist] = useState<string[]>(['BTC', 'ETH', 'SOL', 'XRP', 'XAUUSD']);
+  const [activeSignals, setActiveSignals] = useState<ActiveSignal[]>([]);
+  const [scheduledTrades, setScheduledTrades] = useState<ScheduledTrade[]>([]);
+  const [watchlist, setWatchlist] = useState<string[]>(DEFAULT_WATCHLIST);
+  const [settings, setSettings] = useState<Settings>({
+    autopilotThreshold: 70,
+    okxApiKey: 'pk_test_***',
+    alpacaApiKey: 'pk_test_***',
+    oandaApiKey: 'Bearer token_***',
+    oandaAccountId: 'account_***',
+    oandaEnvironment: 'practice',
+    telegramToken: 'bot_***',
+    telegramChatId: 'YOUR_TELEGRAM_CHAT_ID_HERE',
+    framework: 'Al Brooks',
+    notificationEmail: 'user@example.com',
+    isLiveTrading: false,
+    mexcApiKey: 'mexc_key_***',
+    mexcSecretKey: 'mexc_secret_***',
+  });
 
-  const addSignal = useCallback((signal: Signal) => {
-    setSignals(prev => [signal, ...prev.slice(0, 49)]); // Keep last 50
+  const refreshData = useCallback(async () => {
+    try {
+      // Get settings
+      const settingsRes = await fetch('/api/settings');
+      if (settingsRes.ok) {
+        const settingsData = await settingsRes.json();
+        setSettings(settingsData);
+      }
+
+      // Get signals
+      const signalsRes = await fetch('/api/signals');
+      if (signalsRes.ok) {
+        const signalsData = await signalsRes.json();
+        setSignals(signalsData.signals || []);
+      }
+
+      // Get trades and scheduled trades
+      const tradesRes = await fetch('/api/trades');
+      if (tradesRes.ok) {
+        const tradesData = await tradesRes.json();
+        setActiveSignals(tradesData.trades || []);
+        setScheduledTrades(tradesData.scheduledTrades || []);
+      }
+    } catch (error) {
+      console.error('[v0] Dashboard data sync error:', error);
+    }
   }, []);
 
-  const addActiveSignal = useCallback((signal: ActiveSignal) => {
-    setActiveSignals(prev => new Map(prev).set(signal.id, signal));
-  }, []);
+  // Poll for updates (TradingView pipeline is server-side, so poll client-side)
+  useEffect(() => {
+    refreshData();
+    const interval = setInterval(refreshData, 3000); // Poll every 3 seconds
+    return () => clearInterval(interval);
+  }, [refreshData]);
 
-  const addScheduledTrade = useCallback((trade: ScheduledTrade) => {
-    setScheduledTrades(prev => new Map(prev).set(trade.id, trade));
+  const addSignal = useCallback(async (signal: Signal) => {
+    try {
+      const res = await fetch('/api/signals', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(signal),
+      });
+      if (res.ok) {
+        await refreshData();
+      }
+    } catch (error) {
+      console.error('Failed to add signal:', error);
+    }
+  }, [refreshData]);
+
+  const addActiveSignal = useCallback(async (signal: ActiveSignal) => {
+    try {
+      const res = await fetch('/api/trades', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'execute',
+          trade: signal,
+        }),
+      });
+      if (res.ok) {
+        await refreshData();
+      }
+    } catch (error) {
+      console.error('Failed to execute trade:', error);
+    }
+  }, [refreshData]);
+
+  const addScheduledTrade = useCallback(async (trade: ScheduledTrade) => {
+    try {
+      const res = await fetch('/api/trades', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'schedule',
+          trade,
+        }),
+      });
+      if (res.ok) {
+        await refreshData();
+      }
+    } catch (error) {
+      console.error('Failed to schedule trade:', error);
+    }
+  }, [refreshData]);
+
+  const deleteScheduledTrade = useCallback(async (id: string) => {
+    try {
+      const res = await fetch('/api/trades', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'delete_scheduled',
+          trade: { id },
+        }),
+      });
+      if (res.ok) {
+        await refreshData();
+      }
+    } catch (error) {
+      console.error('Failed to delete scheduled trade:', error);
+    }
+  }, [refreshData]);
+
+  const clearTrades = useCallback(async () => {
+    try {
+      const res = await fetch('/api/trades', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'clear_trades',
+        }),
+      });
+      if (res.ok) {
+        await refreshData();
+      }
+    } catch (error) {
+      console.error('Failed to clear trades:', error);
+    }
+  }, [refreshData]);
+
+  const updateSettings = useCallback(async (newSettings: Partial<Settings>) => {
+    try {
+      const res = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newSettings),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setSettings(data.settings);
+      }
+    } catch (error) {
+      console.error('Failed to update settings:', error);
+    }
   }, []);
 
   const addToWatchlist = useCallback((symbol: string) => {
     setWatchlist(prev => 
-      prev.includes(symbol) ? prev : [...prev, symbol]
+      prev.includes(symbol.toUpperCase()) ? prev : [...prev, symbol.toUpperCase()]
     );
   }, []);
 
   const removeFromWatchlist = useCallback((symbol: string) => {
-    setWatchlist(prev => prev.filter(s => s !== symbol));
+    setWatchlist(prev => prev.filter(s => s !== symbol.toUpperCase()));
   }, []);
 
   const getSignalsByPair = useCallback((pair: string): Signal[] => {
-    return signals.filter(s => s.pair === pair);
+    return signals.filter(s => s.pair.toUpperCase() === pair.toUpperCase());
   }, [signals]);
 
   return (
@@ -88,12 +265,17 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
         activeSignals,
         scheduledTrades,
         watchlist,
+        settings,
         addSignal,
         addActiveSignal,
         addScheduledTrade,
+        deleteScheduledTrade,
         addToWatchlist,
         removeFromWatchlist,
         getSignalsByPair,
+        updateSettings,
+        refreshData,
+        clearTrades,
       }}
     >
       {children}

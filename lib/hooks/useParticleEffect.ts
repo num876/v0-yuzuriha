@@ -12,19 +12,28 @@ export function useParticleEffect() {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    for (let i = 0; i < 8; i++) {
+    // Read accent color from CSS variable, fallback to purple
+    const accentColor = getComputedStyle(document.documentElement)
+      .getPropertyValue('--accent-purple').trim() || '#8b5cf6';
+
+    const count = 10;
+    for (let i = 0; i < count; i++) {
       const particle = document.createElement('div');
-      const angle = (i / 8) * Math.PI * 2;
-      const velocity = 6;
+      const angle = (i / count) * Math.PI * 2;
+      const velocity = 4 + Math.random() * 4;
       const tx = Math.cos(angle) * velocity;
       const ty = Math.sin(angle) * velocity;
 
       particle.style.setProperty('--tx', `${tx}px`);
       particle.style.setProperty('--ty', `${ty}px`);
-      
-      particle.className = 'particle absolute w-2 h-2 bg-accent rounded-full';
+
+      particle.className = 'particle absolute rounded-full';
       particle.style.left = `${x}px`;
       particle.style.top = `${y}px`;
+      particle.style.width = `${3 + Math.random() * 3}px`;
+      particle.style.height = particle.style.width;
+      particle.style.background = accentColor;
+      particle.style.boxShadow = `0 0 6px ${accentColor}`;
 
       containerRef.current.appendChild(particle);
 

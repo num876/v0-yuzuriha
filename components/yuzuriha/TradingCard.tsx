@@ -27,12 +27,13 @@ export function TradingCard({
     <div
       onClick={onClick}
       className={cn(
-        'rounded-lg border p-4 cursor-pointer transition-all hover:border-accent hover:shadow-sm',
+        'rounded-xl border p-4 cursor-pointer transition-all duration-300 card-hover-lift',
         isBuy
-          ? 'border-success/20 bg-success/5'
-          : 'border-destructive/20 bg-destructive/5',
+          ? 'border-[#22c55e]/15 hover:border-[#22c55e]/30'
+          : 'border-[#ef4444]/15 hover:border-[#ef4444]/30',
         className
       )}
+      style={{ background: isBuy ? 'rgba(34, 197, 94, 0.04)' : 'rgba(239, 68, 68, 0.04)' }}
     >
       <div className="flex items-start justify-between mb-3">
         <div>
@@ -41,7 +42,7 @@ export function TradingCard({
         </div>
         <div
           className={cn(
-            'font-semibold text-sm px-2 py-1 rounded',
+            'font-semibold text-sm px-2 py-1 rounded backdrop-blur-sm',
             isBuy ? 'bg-success/20 text-success' : 'bg-destructive/20 text-destructive'
           )}
         >

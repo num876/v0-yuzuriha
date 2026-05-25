@@ -44,13 +44,13 @@ export default function WatchlistPage() {
       </div>
 
       {/* Add Asset Form */}
-      <div className="rounded-lg border border-border bg-card p-6 space-y-4">
+      <div className="glass-card">
         <h2 className="font-semibold">Add new asset</h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <select
             value={newAsset.type}
             onChange={(e) => setNewAsset({ ...newAsset, type: e.target.value })}
-            className="rounded-md border border-border bg-card px-3 py-2"
+            className="rounded-xl border border-[#1e1e3a]/50 bg-[#111128]/80 px-3 py-2 text-sm focus:border-[#8b5cf6]/50 focus:ring-1 focus:ring-[#8b5cf6]/20 outline-none"
           >
             <option value="crypto">Crypto</option>
             <option value="stocks">Stocks</option>
@@ -60,19 +60,21 @@ export default function WatchlistPage() {
             placeholder="Symbol"
             value={newAsset.symbol}
             onChange={(e) => setNewAsset({ ...newAsset, symbol: e.target.value })}
+            className="w-full rounded-xl border border-[#1e1e3a]/50 bg-[#111128]/80 px-3 py-2.5 text-sm transition-all duration-200 focus:border-[#8b5cf6]/50 focus:ring-1 focus:ring-[#8b5cf6]/20 hover:border-[#8b5cf6]/30 outline-none"
           />
           <Input
             placeholder="Name"
             value={newAsset.name}
             onChange={(e) => setNewAsset({ ...newAsset, name: e.target.value })}
+            className="w-full rounded-xl border border-[#1e1e3a]/50 bg-[#111128]/80 px-3 py-2.5 text-sm transition-all duration-200 focus:border-[#8b5cf6]/50 focus:ring-1 focus:ring-[#8b5cf6]/20 hover:border-[#8b5cf6]/30 outline-none"
           />
           <Input
             placeholder="Notes (optional)"
             value={newAsset.notes}
             onChange={(e) => setNewAsset({ ...newAsset, notes: e.target.value })}
-            className="lg:col-span-1"
+            className="w-full rounded-xl border border-[#1e1e3a]/50 bg-[#111128]/80 px-3 py-2.5 text-sm transition-all duration-200 focus:border-[#8b5cf6]/50 focus:ring-1 focus:ring-[#8b5cf6]/20 hover:border-[#8b5cf6]/30 outline-none lg:col-span-1"
           />
-          <Button onClick={handleAddAsset} className="gap-2">
+          <Button onClick={handleAddAsset} className="btn-glow text-white border-0 gap-2">
             <Plus className="h-4 w-4" />
             Add
           </Button>
@@ -80,13 +82,13 @@ export default function WatchlistPage() {
       </div>
 
       {/* Crypto Watchlist */}
-      <div className="rounded-lg border border-border bg-card overflow-hidden">
-        <div className="border-b border-border bg-secondary p-4">
+      <div className="glass-card !p-0 overflow-hidden">
+        <div className="border-b border-[#1e1e3a]/50 bg-[#111128]/40 p-4">
           <h2 className="font-semibold">Cryptocurrencies</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="border-b border-border">
+            <thead className="border-b border-[#1e1e3a]/50">
               <tr>
                 <th className="text-left py-3 px-4 font-medium text-muted-foreground">Symbol</th>
                 <th className="text-left py-3 px-4 font-medium text-muted-foreground">Name</th>
@@ -96,7 +98,7 @@ export default function WatchlistPage() {
             </thead>
             <tbody>
               {watchlist.crypto.map((asset) => (
-                <tr key={asset.symbol} className="border-b border-border/50 hover:bg-secondary/50">
+                <tr key={asset.symbol} className="border-b border-[#1e1e3a]/50 hover:bg-[#111128]/60 transition-all duration-200">
                   <td className="py-3 px-4 font-mono font-bold">{asset.symbol}</td>
                   <td className="py-3 px-4">{asset.name}</td>
                   <td className="py-3 px-4 text-xs text-muted-foreground">{asset.notes || '-'}</td>
@@ -122,13 +124,13 @@ export default function WatchlistPage() {
       </div>
 
       {/* Stocks Watchlist */}
-      <div className="rounded-lg border border-border bg-card overflow-hidden">
-        <div className="border-b border-border bg-secondary p-4">
+      <div className="glass-card !p-0 overflow-hidden">
+        <div className="border-b border-[#1e1e3a]/50 bg-[#111128]/40 p-4">
           <h2 className="font-semibold">Stocks</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="border-b border-border">
+            <thead className="border-b border-[#1e1e3a]/50">
               <tr>
                 <th className="text-left py-3 px-4 font-medium text-muted-foreground">Symbol</th>
                 <th className="text-left py-3 px-4 font-medium text-muted-foreground">Name</th>
@@ -138,7 +140,7 @@ export default function WatchlistPage() {
             </thead>
             <tbody>
               {watchlist.stocks.map((asset) => (
-                <tr key={asset.symbol} className="border-b border-border/50 hover:bg-secondary/50">
+                <tr key={asset.symbol} className="border-b border-[#1e1e3a]/50 hover:bg-[#111128]/60 transition-all duration-200">
                   <td className="py-3 px-4 font-mono font-bold">{asset.symbol}</td>
                   <td className="py-3 px-4">{asset.name}</td>
                   <td className="py-3 px-4 text-xs text-muted-foreground">{asset.notes || '-'}</td>
@@ -164,13 +166,13 @@ export default function WatchlistPage() {
       </div>
 
       {/* Commodities Watchlist */}
-      <div className="rounded-lg border border-border bg-card overflow-hidden">
-        <div className="border-b border-border bg-secondary p-4">
+      <div className="glass-card !p-0 overflow-hidden">
+        <div className="border-b border-[#1e1e3a]/50 bg-[#111128]/40 p-4">
           <h2 className="font-semibold">Commodities</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="border-b border-border">
+            <thead className="border-b border-[#1e1e3a]/50">
               <tr>
                 <th className="text-left py-3 px-4 font-medium text-muted-foreground">Symbol</th>
                 <th className="text-left py-3 px-4 font-medium text-muted-foreground">Name</th>
@@ -180,7 +182,7 @@ export default function WatchlistPage() {
             </thead>
             <tbody>
               {watchlist.commodities.map((asset) => (
-                <tr key={asset.symbol} className="border-b border-border/50 hover:bg-secondary/50">
+                <tr key={asset.symbol} className="border-b border-[#1e1e3a]/50 hover:bg-[#111128]/60 transition-all duration-200">
                   <td className="py-3 px-4 font-mono font-bold">{asset.symbol}</td>
                   <td className="py-3 px-4">{asset.name}</td>
                   <td className="py-3 px-4 text-xs text-muted-foreground">{asset.notes || '-'}</td>

@@ -18,13 +18,16 @@ export function MetricStat({
   icon,
 }: MetricStatProps) {
   return (
-    <div className={cn('flex flex-col gap-2 rounded-lg border border-border bg-card p-3', className)}>
+    <div
+      className={cn('flex flex-col gap-2 rounded-xl border border-[#1e1e3a]/50 p-3 transition-all duration-300 hover:border-[#8b5cf6]/20', className)}
+      style={{ background: 'rgba(12, 12, 29, 0.9)' }}
+    >
       <div className="flex items-center justify-between">
         <span className="text-xs font-medium text-muted-foreground">{label}</span>
         {icon && <div className="text-muted-foreground">{icon}</div>}
       </div>
       <div className="flex items-end gap-2">
-        <div className="text-lg font-bold text-foreground">{value}</div>
+        <div className="text-lg font-bold text-foreground" style={{ textShadow: '0 0 20px rgba(139, 92, 246, 0.15)' }}>{value}</div>
         {change !== undefined && (
           <div
             className={cn(

@@ -50,7 +50,7 @@ export default function JournalPage() {
         </div>
         <Button
           onClick={() => setIsAdding(!isAdding)}
-          className="gap-2"
+          className="btn-glow text-white border-0 gap-2"
         >
           <Plus className="h-4 w-4" />
           Add note
@@ -59,7 +59,7 @@ export default function JournalPage() {
 
       {/* Add Note Form */}
       {isAdding && (
-        <div className="rounded-lg border border-border bg-card p-6 space-y-4">
+        <div className="glass-card">
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label className="block text-sm font-medium mb-2">Pair</label>
@@ -67,6 +67,7 @@ export default function JournalPage() {
                 placeholder="BTC/USDT"
                 value={newNote.pair}
                 onChange={(e) => setNewNote({ ...newNote, pair: e.target.value })}
+                className="w-full rounded-xl border border-[#1e1e3a]/50 bg-[#111128]/80 px-3 py-2.5 text-sm focus:border-[#8b5cf6]/50 outline-none"
               />
             </div>
           </div>
@@ -77,11 +78,12 @@ export default function JournalPage() {
               value={newNote.content}
               onChange={(e) => setNewNote({ ...newNote, content: e.target.value })}
               rows={4}
+              className="w-full rounded-xl border border-[#1e1e3a]/50 bg-[#111128]/80 px-3 py-2.5 text-sm focus:border-[#8b5cf6]/50 outline-none"
             />
           </div>
           <div className="flex gap-2">
-            <Button onClick={handleAddNote}>Save</Button>
-            <Button variant="outline" onClick={() => setIsAdding(false)}>
+            <Button onClick={handleAddNote} className="btn-glow text-white border-0">Save</Button>
+            <Button variant="outline" onClick={() => setIsAdding(false)} className="border-[#1e1e3a] hover:bg-[#8b5cf6]/10 text-white">
               Cancel
             </Button>
           </div>
@@ -91,7 +93,7 @@ export default function JournalPage() {
       {/* Notes List */}
       <div className="space-y-3">
         {notes.map((note) => (
-          <div key={note.id} className="rounded-lg border border-border bg-card p-4">
+          <div key={note.id} className="glass-card card-hover-lift">
             <div className="flex items-start justify-between mb-3">
               <div>
                 <h3 className="font-mono font-bold text-lg">{note.pair}</h3>

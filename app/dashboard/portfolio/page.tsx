@@ -58,7 +58,7 @@ export default function PortfolioPage() {
       {/* Stats Grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
-          <div key={stat.label} className="rounded-lg border border-border bg-card p-4">
+          <div key={stat.label} className="rounded-xl border border-[#1e1e3a]/50 p-4 transition-all duration-300 hover:border-[#8b5cf6]/20" style={{ background: 'rgba(12, 12, 29, 0.9)' }}>
             <p className="text-xs font-medium text-muted-foreground mb-1">{stat.label}</p>
             <div className="flex items-end gap-2">
               <p className="text-2xl font-bold">{stat.value}</p>
@@ -71,18 +71,18 @@ export default function PortfolioPage() {
       </div>
 
       {/* Chart Placeholder */}
-      <div className="rounded-lg border border-border bg-card p-6">
+      <div className="glass-card-lg !p-6" style={{ background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.03), rgba(6, 182, 212, 0.03))' }}>
         <h2 className="mb-4 font-semibold">PNL chart</h2>
-        <div className="h-64 flex items-center justify-center bg-secondary rounded-lg">
+        <div className="h-64 flex items-center justify-center bg-[#111128]/50 border border-[#1e1e3a]/30 rounded-lg">
           <p className="text-sm text-muted-foreground">Recharts PNL chart</p>
         </div>
       </div>
 
       {/* Open Positions */}
-      <div className="rounded-lg border border-border bg-card p-6">
+      <div className="glass-card-lg !p-6">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-semibold">Open positions</h2>
-          <Button variant="outline" size="sm" className="gap-2">
+          <Button size="sm" className="border-[#1e1e3a] hover:bg-[#8b5cf6]/10 text-white gap-2">
             <Download className="h-4 w-4" />
             Export CSV
           </Button>
@@ -91,7 +91,7 @@ export default function PortfolioPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-border">
+              <tr className="border-b border-[#1e1e3a]/50">
                 <th className="text-left py-2 px-2 font-medium text-muted-foreground">Pair</th>
                 <th className="text-right py-2 px-2 font-medium text-muted-foreground">Size</th>
                 <th className="text-right py-2 px-2 font-medium text-muted-foreground">Entry</th>
@@ -102,7 +102,7 @@ export default function PortfolioPage() {
             </thead>
             <tbody>
               {positions.map((pos) => (
-                <tr key={pos.pair} className="border-b border-border/50 hover:bg-secondary/50">
+                <tr key={pos.pair} className="border-b border-[#1e1e3a]/50 hover:bg-[#111128]/60 transition-all duration-200">
                   <td className="py-3 px-2 font-mono text-sm font-semibold">{pos.pair}</td>
                   <td className="py-3 px-2 text-right">{pos.size}</td>
                   <td className="py-3 px-2 text-right">${pos.entry.toFixed(2)}</td>
