@@ -325,14 +325,21 @@ export default function DashboardPage() {
                   <select 
                     value={buyTimeframe}
                     onChange={(e) => setBuyTimeframe(e.target.value)}
-                    className="w-full rounded-xl border border-[#1e1e3a]/50 bg-[#111128]/80 px-3 py-2.5 text-xs text-white focus:border-[#8b5cf6]/50 focus:ring-1 focus:ring-[#8b5cf6]/20 hover:border-[#8b5cf6]/30 outline-none"
+                    className="w-full rounded-xl border border-[#1e1e3a]/50 bg-[#111128]/80 px-3 py-2.5 text-xs text-white focus:border-[#8b5cf6]/50 focus:ring-1 focus:ring-[#8b5cf6]/20 hover:border-[#8b5cf6]/30 outline-none cursor-pointer"
                   >
                     <option value="1m">1m</option>
+                    <option value="3m">3m</option>
                     <option value="5m">5m</option>
                     <option value="15m">15m</option>
+                    <option value="30m">30m</option>
                     <option value="1h">1h</option>
+                    <option value="2h">2h</option>
                     <option value="4h">4h</option>
+                    <option value="12h">12h</option>
                     <option value="1d">1d</option>
+                    <option value="3d">3d</option>
+                    <option value="1w">1w</option>
+                    <option value="1M">1M</option>
                   </select>
                 </div>
                 <div>
@@ -376,14 +383,21 @@ export default function DashboardPage() {
                   <select 
                     value={sellTimeframe}
                     onChange={(e) => setSellTimeframe(e.target.value)}
-                    className="w-full rounded-xl border border-[#1e1e3a]/50 bg-[#111128]/80 px-3 py-2.5 text-xs text-white focus:border-[#8b5cf6]/50 focus:ring-1 focus:ring-[#8b5cf6]/20 hover:border-[#8b5cf6]/30 outline-none"
+                    className="w-full rounded-xl border border-[#1e1e3a]/50 bg-[#111128]/80 px-3 py-2.5 text-xs text-white focus:border-[#8b5cf6]/50 focus:ring-1 focus:ring-[#8b5cf6]/20 hover:border-[#8b5cf6]/30 outline-none cursor-pointer"
                   >
                     <option value="1m">1m</option>
+                    <option value="3m">3m</option>
                     <option value="5m">5m</option>
                     <option value="15m">15m</option>
+                    <option value="30m">30m</option>
                     <option value="1h">1h</option>
+                    <option value="2h">2h</option>
                     <option value="4h">4h</option>
+                    <option value="12h">12h</option>
                     <option value="1d">1d</option>
+                    <option value="3d">3d</option>
+                    <option value="1w">1w</option>
+                    <option value="1M">1M</option>
                   </select>
                 </div>
                 <div>
