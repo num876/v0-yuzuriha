@@ -54,7 +54,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = async (email: string, password: string) => {
     // Suppresses auto-login on signUp if email confirmation is required,
     // otherwise auto-logs in the user
-    const { error } = await supabase.auth.signUp({ email, password });
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/login`,
+      },
+    });
     return { error };
   };
 
