@@ -91,6 +91,7 @@ export function Sidebar({ className, isOpen = true, onClose }: SidebarProps) {
             <Link
               key={item.href}
               href={item.href}
+              onClick={onClose}
               className={cn(
                 'flex items-center gap-3 border-l-2 border-transparent px-4 py-3 text-sm font-medium transition-all duration-200 hover:bg-[#8b5cf6]/8',
                 'data-[active]:border-[#8b5cf6] data-[active]:bg-[#8b5cf6]/10 data-[active]:text-[#8b5cf6]'

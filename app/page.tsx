@@ -134,18 +134,18 @@ export default function LandingPage() {
           </div>
 
           {/* Stats Row */}
-          <div className="mt-16 grid grid-cols-3 gap-8 max-w-lg reveal-inview" style={{ transitionDelay: '300ms' }}>
+          <div className="mt-16 grid grid-cols-3 gap-4 sm:gap-8 max-w-lg reveal-inview" style={{ transitionDelay: '300ms' }}>
             <div>
-              <AnimatedCounter end={156} suffix="+" className="text-3xl font-bold gradient-text font-[family-name:var(--font-display)]" />
-              <div className="text-sm text-muted-foreground mt-1">Total Signals Routed</div>
+              <AnimatedCounter end={156} suffix="+" className="text-2xl sm:text-3xl font-bold gradient-text font-[family-name:var(--font-display)]" />
+              <div className="text-xs sm:text-sm text-muted-foreground mt-1">Total Signals Routed</div>
             </div>
             <div>
-              <AnimatedCounter end={68} suffix="%" className="text-3xl font-bold gradient-text-green font-[family-name:var(--font-display)]" />
-              <div className="text-sm text-muted-foreground mt-1">Mean Confidence Win Rate</div>
+              <AnimatedCounter end={68} suffix="%" className="text-2xl sm:text-3xl font-bold gradient-text-green font-[family-name:var(--font-display)]" />
+              <div className="text-xs sm:text-sm text-muted-foreground mt-1">Mean Confidence Win Rate</div>
             </div>
             <div>
-              <AnimatedCounter end={24} suffix="/7" className="text-3xl font-bold gradient-text font-[family-name:var(--font-display)]" />
-              <div className="text-sm text-muted-foreground mt-1">System Availability</div>
+              <AnimatedCounter end={24} suffix="/7" className="text-2xl sm:text-3xl font-bold gradient-text font-[family-name:var(--font-display)]" />
+              <div className="text-xs sm:text-sm text-muted-foreground mt-1">System Availability</div>
             </div>
           </div>
         </div>
