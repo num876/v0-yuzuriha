@@ -70,6 +70,7 @@ interface DashboardContextType {
   addActiveSignal: (signal: ActiveSignal) => Promise<void>;
   addScheduledTrade: (trade: ScheduledTrade) => Promise<void>;
   deleteScheduledTrade: (id: string) => Promise<void>;
+  deleteTrade: (id: string) => Promise<void>;
   addToWatchlist: (symbol: string) => void;
   removeFromWatchlist: (symbol: string) => void;
   getSignalsByPair: (pair: string) => Signal[];
@@ -211,6 +212,24 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     }
   }, [refreshData]);
 
+  const deleteTrade = useCallback(async (id: string) => {
+    try {
+      const res = await fetch('/api/trades', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'delete_trade',
+          trade: { id },
+        }),
+      });
+      if (res.ok) {
+        await refreshData();
+      }
+    } catch (error) {
+      console.error('Failed to delete trade:', error);
+    }
+  }, [refreshData]);
+
   const clearTrades = useCallback(async () => {
     try {
       const res = await fetch('/api/trades', {
@@ -270,6 +289,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
         addActiveSignal,
         addScheduledTrade,
         deleteScheduledTrade,
+        deleteTrade,
         addToWatchlist,
         removeFromWatchlist,
         getSignalsByPair,

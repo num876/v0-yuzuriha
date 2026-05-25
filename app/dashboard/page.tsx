@@ -16,6 +16,7 @@ export default function DashboardPage() {
     scheduledTrades, 
     addScheduledTrade, 
     deleteScheduledTrade,
+    deleteTrade,
     addActiveSignal,
     clearTrades,
     settings
@@ -445,9 +446,18 @@ export default function DashboardPage() {
                   <div key={trade.id} className="rounded-xl border border-[#1e1e3a]/40 bg-[#111128]/30 p-3 text-xs flex flex-col gap-1">
                     <div className="flex justify-between items-center">
                       <span className="font-mono font-bold text-white">{trade.pair}</span>
-                      <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${trade.side === 'buy' ? 'bg-success/15 text-success' : 'bg-destructive/15 text-destructive'}`}>
-                        {trade.side.toUpperCase()}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${trade.side === 'buy' ? 'bg-success/15 text-success' : 'bg-destructive/15 text-destructive'}`}>
+                          {trade.side.toUpperCase()}
+                        </span>
+                        <button 
+                          onClick={() => deleteTrade(trade.id)}
+                          title="Cancel Signal"
+                          className="text-muted-foreground hover:text-red-500 transition-colors cursor-pointer"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
                     </div>
                     <div className="flex justify-between text-muted-foreground text-[11px]">
                       <span>Price: ${trade.price.toLocaleString()}</span>

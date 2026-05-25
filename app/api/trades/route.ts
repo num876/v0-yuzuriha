@@ -64,6 +64,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true });
     }
 
+    if (action === 'delete_trade') {
+      db.trades = db.trades.filter(t => t.id !== trade.id);
+      writeDb(db);
+      return NextResponse.json({ success: true });
+    }
+
     if (action === 'clear_trades') {
       db.trades = [];
       writeDb(db);
