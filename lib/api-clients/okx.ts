@@ -21,6 +21,7 @@ export class OKXClient {
     try {
       const payload: any = { 
         ticker, 
+        instId: params.instId,
         signal: params.side.toLowerCase() 
       };
       
