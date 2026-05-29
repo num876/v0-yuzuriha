@@ -60,9 +60,19 @@ export async function POST(request: NextRequest) {
           const client = new OKXClient();
           const instId = OKXClient.formatSymbol(trade.pair || 'BTC-USDT');
 
+          let sz = "0.001"; // Fallback minimum
+          if (realPrice > 0) {
+            const calculatedSize = (Number(trade.positionSize) || 100) / realPrice;
+            sz = Math.max(0.001, calculatedSize).toFixed(4);
+          }
+
           const tradeResponse = await client.placeOrder({
             instId,
             side: trade.side as 'buy' | 'sell',
+            sz,
+            apiKey: db.settings.okxApiKey,
+            secretKey: db.settings.okxSecretKey,
+            passphrase: db.settings.okxPassphrase,
           });
           
           okxOrderId = tradeResponse?.orderId || `CF_WRK_${Date.now()}`;

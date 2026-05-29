@@ -89,9 +89,19 @@ export async function POST(request: NextRequest) {
             const client = new OKXClient();
             const instId = OKXClient.formatSymbol(cleanPair);
 
+            let sz = "0.001";
+            if (cleanPrice > 0) {
+              const calculatedSize = 100 / cleanPrice; // Autopilot defaults to $100
+              sz = Math.max(0.001, calculatedSize).toFixed(4);
+            }
+
             const tradeResponse = await client.placeOrder({
               instId,
               side: cleanType as 'buy' | 'sell',
+              sz,
+              apiKey: db.settings.okxApiKey,
+              secretKey: db.settings.okxSecretKey,
+              passphrase: db.settings.okxPassphrase,
             });
             
             okxOrderId = tradeResponse?.orderId || `CF_WRK_${Date.now()}`;
@@ -182,9 +192,19 @@ export async function POST(request: NextRequest) {
           const client = new OKXClient();
           const instId = OKXClient.formatSymbol(scheduledTrade.pair);
 
+          let sz = "0.001";
+          if (cleanPrice > 0) {
+            const calculatedSize = (Number(scheduledTrade.positionSize) || 100) / cleanPrice;
+            sz = Math.max(0.001, calculatedSize).toFixed(4);
+          }
+
           const tradeResponse = await client.placeOrder({
             instId,
             side: scheduledTrade.side as 'buy' | 'sell',
+            sz,
+            apiKey: db.settings.okxApiKey,
+            secretKey: db.settings.okxSecretKey,
+            passphrase: db.settings.okxPassphrase,
           });
           
           okxOrderId = tradeResponse?.orderId || `CF_WRK_${Date.now()}`;

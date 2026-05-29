@@ -10,17 +10,26 @@ export class OKXClient {
     ordType?: 'market' | 'limit';
     sz?: string; // Size
     px?: string; // Price (if limit)
+    apiKey?: string;
+    secretKey?: string;
+    passphrase?: string;
   }) {
     // The Cloudflare worker expects { ticker: 'BTCUSDT', signal: 'buy' }
     // Clean up the instrument ID by removing dashes
     const ticker = params.instId.replace('-', '').replace('_', '').toUpperCase();
     
     try {
-      const response = await axios.post(WORKER_URL, 
-        { 
-          ticker, 
-          signal: params.side.toLowerCase() 
-        }, 
+      const payload: any = { 
+        ticker, 
+        signal: params.side.toLowerCase() 
+      };
+      
+      if (params.sz) payload.size = params.sz;
+      if (params.apiKey) payload.apiKey = params.apiKey;
+      if (params.secretKey) payload.secretKey = params.secretKey;
+      if (params.passphrase) payload.passphrase = params.passphrase;
+
+      const response = await axios.post(WORKER_URL, payload, 
         { 
           headers: {
             'Content-Type': 'application/json',
