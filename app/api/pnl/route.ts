@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
       const baseAsset = trade.pair.split('-')[0].split('/')[0].toUpperCase();
       const priceData = currentPrices[baseAsset];
       const currentPrice = priceData?.current || trade.price;
-      const units = trade.size / trade.price;
+      const units = trade.price > 0 ? trade.size / trade.price : 0;
       const isBuy = trade.side === 'buy';
 
       const pnl = isBuy
@@ -60,14 +60,14 @@ export async function GET(request: NextRequest) {
     const winRate = openPositions.length > 0 ? wins / openPositions.length : 0;
 
     // Simple Sharpe approximation
-    const returns = openPositions.map(p => p.pnl / p.size);
+    const returns = openPositions.map(p => p.size > 0 ? p.pnl / p.size : 0);
     const meanReturn = returns.reduce((a, b) => a + b, 0) / (returns.length || 1);
     const variance = returns.reduce((a, r) => a + Math.pow(r - meanReturn, 2), 0) / (returns.length || 1);
     const stdDev = Math.sqrt(variance) || 1;
     const sharpeRatio = meanReturn / stdDev;
 
     // Max drawdown from individual position losses
-    const losses = openPositions.map(p => (p.pnl / p.size));
+    const losses = openPositions.map(p => p.size > 0 ? (p.pnl / p.size) : 0);
     const maxDrawdown = losses.length > 0 ? Math.min(0, ...losses) : 0;
 
     return NextResponse.json({

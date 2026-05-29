@@ -20,7 +20,8 @@ export default function DashboardPage() {
     deleteTrade,
     addActiveSignal,
     clearTrades,
-    settings
+    settings,
+    pnlStats
   } = useDashboard();
   const { subscribe, getPrice } = usePrices();
 
@@ -103,12 +104,10 @@ export default function DashboardPage() {
     setShowLiveConfirm(false);
   };
 
-  // Calculate stats
-  const totalTrades = activeSignals.length;
-  const winRate = totalTrades > 0 
-    ? Math.round((activeSignals.filter(t => (t.pnl || 0) > 0).length / totalTrades) * 100) 
-    : 0;
-  const totalPnl = activeSignals.reduce((acc, t) => acc + (t.pnl || 0), 0);
+  // Calculate stats from live API feed
+  const totalTrades = pnlStats?.stats?.totalTrades || activeSignals.length;
+  const winRate = pnlStats?.stats?.winRate ? Math.round(pnlStats.stats.winRate * 100) : 0;
+  const totalPnl = pnlStats?.totalPnl || 0;
 
   // Coinly CSV export
   const exportToCoinly = () => {

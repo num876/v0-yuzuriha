@@ -71,6 +71,7 @@ interface DashboardContextType {
   scheduledTrades: ScheduledTrade[];
   watchlist: string[];
   settings: Settings;
+  pnlStats: any;
   loading: boolean;
   addSignal: (signal: Signal) => Promise<void>;
   addActiveSignal: (signal: ActiveSignal) => Promise<void>;
@@ -101,6 +102,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   const [activeSignals, setActiveSignals] = useState<ActiveSignal[]>([]);
   const [scheduledTrades, setScheduledTrades] = useState<ScheduledTrade[]>([]);
   const [watchlist, setWatchlist] = useState<string[]>(DEFAULT_WATCHLIST);
+  const [pnlStats, setPnlStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [settings, setSettings] = useState<Settings>({
     autopilotThreshold: 70,
@@ -162,6 +164,13 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
         localStorage.setItem('yuzuriha_active_signals', JSON.stringify(tradesData.trades || []));
         localStorage.setItem('yuzuriha_scheduled_trades', JSON.stringify(tradesData.scheduledTrades || []));
       }
+
+      // Get live PNL stats
+      const pnlRes = await fetch('/api/pnl');
+      if (pnlRes.ok) {
+        const pnlData = await pnlRes.json();
+        setPnlStats(pnlData);
+      }
     } catch (error) {
       console.error('[v0] Dashboard data sync error:', error);
     } finally {
@@ -170,9 +179,10 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Poll for updates (TradingView pipeline is server-side, so poll client-side)
+  // Interval increased to 15s to prevent Vercel KV rate limits exhaustion (10k requests/day limit)
   useEffect(() => {
     refreshData();
-    const interval = setInterval(refreshData, 3000); // Poll every 3 seconds
+    const interval = setInterval(refreshData, 15000); // Poll every 15 seconds
     return () => clearInterval(interval);
   }, [refreshData]);
 
@@ -318,6 +328,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
         scheduledTrades,
         watchlist,
         settings,
+        pnlStats,
         loading,
         addSignal,
         addActiveSignal,
