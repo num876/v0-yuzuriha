@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { kv } from '@vercel/kv';
+import { Redis } from '@upstash/redis';
 
 const DB_FILE = path.join(process.cwd(), 'data', 'db.json');
 const KV_KEY = 'yuzuriha_db_v1';
@@ -108,15 +108,34 @@ const defaultDb: DatabaseSchema = {
   },
 };
 
+function getRedisClient() {
+  if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+    return new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN,
+    });
+  }
+  // Fallback for Vercel KV if they used the older integration
+  if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
+    return new Redis({
+      url: process.env.KV_REST_API_URL,
+      token: process.env.KV_REST_API_TOKEN,
+    });
+  }
+  return null;
+}
+
 export async function readDb(): Promise<DatabaseSchema> {
   try {
-    // Attempt to read from Vercel KV first (Production / Cloud persistence)
-    if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
-      const data = await kv.get<DatabaseSchema>(KV_KEY);
+    const redis = getRedisClient();
+    
+    // Attempt to read from Cloud Redis first
+    if (redis) {
+      const data = await redis.get<DatabaseSchema>(KV_KEY);
       if (data) return data;
       
-      // If KV is empty but configured, initialize it with default DB
-      await kv.set(KV_KEY, defaultDb);
+      // If DB is empty but configured, initialize it
+      await redis.set(KV_KEY, defaultDb);
       return defaultDb;
     }
 
@@ -136,9 +155,11 @@ export async function readDb(): Promise<DatabaseSchema> {
 
 export async function writeDb(db: DatabaseSchema): Promise<void> {
   try {
-    // Attempt to write to Vercel KV
-    if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
-      await kv.set(KV_KEY, db);
+    const redis = getRedisClient();
+
+    // Attempt to write to Cloud Redis
+    if (redis) {
+      await redis.set(KV_KEY, db);
       return;
     }
 
