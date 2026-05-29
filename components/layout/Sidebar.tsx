@@ -20,8 +20,8 @@ const navigationItems = [
   { href: '/dashboard/portfolio', icon: BarChart3, label: 'Portfolio' },
   { href: '/dashboard/news', icon: BookOpen, label: 'News' },
   { href: '/dashboard/history', icon: TrendingUp, label: 'Transaction History' },
-  { href: '/dashboard/journal', icon: Layers, label: 'Trade Ledger' },
-  { href: '/dashboard/watchlist', icon: Plus, label: 'Monitor Watchlist' },
+  { href: '/dashboard/journal', icon: Layers, label: 'Journal' },
+  { href: '/dashboard/watchlist', icon: Plus, label: 'Watchlist' },
   { href: '/dashboard/settings', icon: Settings, label: 'Settings' },
 ];
 
@@ -118,12 +118,12 @@ export function Sidebar({ className, isOpen = true, onClose }: SidebarProps) {
       <div className="flex flex-col border-b border-[#1e1e3a]/50 p-4 gap-2">
         <div className="flex items-center justify-between">
           <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-            Autonomous Signals
+            Active Trade Signals
           </h2>
           <span className="h-2 w-2 rounded-full bg-[#22c55e] animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
         </div>
         <p className="text-[11px] text-muted-foreground leading-normal">
-          No pipeline signals detected. Standing by for indicator webhooks...
+          No signals found. Waiting for new trading opportunities...
         </p>
       </div>
 
@@ -132,7 +132,7 @@ export function Sidebar({ className, isOpen = true, onClose }: SidebarProps) {
         <div className="rounded-lg border border-[#f59e0b]/20 bg-[#f59e0b]/5 p-3 text-[11px] text-[#f59e0b] leading-normal flex items-start gap-2">
           <span className="font-semibold text-xs mt-0.5">⚠️</span>
           <span>
-            Risk mitigation warning: High correlation detected among core assets (BTC, ETH, SOL, AVAX). Diversify strategy allocation.
+            Risk Warning: Your top assets often move together. Consider diversifying to lower your risk.
           </span>
         </div>
       </div>

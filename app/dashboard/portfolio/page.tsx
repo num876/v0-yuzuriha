@@ -19,7 +19,9 @@ export default function PortfolioPage() {
   const positions = activeSignals.map(trade => {
     const baseAsset = trade.pair.split('-')[0];
     const priceInfo = getPrice(baseAsset);
-    const currentPrice = priceInfo ? priceInfo.current : trade.price;
+    // Use real price from MEXC. If unavailable (e.g. stocks), fall back to entry price.
+    const isLivePrice = priceInfo && priceInfo.current !== null && priceInfo.current !== undefined;
+    const currentPrice = isLivePrice ? priceInfo.current : trade.price;
     const units = trade.size / trade.price;
     const isBuy = trade.side === 'buy';
 
@@ -38,6 +40,7 @@ export default function PortfolioPage() {
       pnlPercent,
       side: trade.side,
       size: trade.size,
+      isLivePrice,
     };
   });
 

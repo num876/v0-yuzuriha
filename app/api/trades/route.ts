@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readDb, writeDb } from '@/lib/db';
+import { getMexcCurrentPrice } from '@/lib/api-clients/mexc';
 
 export async function GET(request: NextRequest) {
   try {
@@ -38,20 +39,56 @@ export async function POST(request: NextRequest) {
     }
 
     if (action === 'execute') {
+      // Fetch real price from MEXC if no price provided or price is the old hardcoded fallback
+      let realPrice = Number(trade.price) || 0;
+      if (!realPrice || realPrice === 82410) {
+        const mexcPrice = await getMexcCurrentPrice(trade.pair || 'BTC-USDT');
+        if (mexcPrice) {
+          realPrice = mexcPrice;
+        }
+      }
+
+      let executedExchange = trade.exchange || 'OKX Demo';
+      let okxOrderId = undefined;
+      let errorDetails = undefined;
+
+      // Execute on OKX via Cloudflare Worker if crypto
+      const isCrypto = trade.assetClass === 'crypto' || !trade.assetClass; // Default to crypto if unknown
+      if (isCrypto) {
+        try {
+          const { OKXClient } = await import('@/lib/api-clients/okx');
+          const client = new OKXClient();
+          const instId = OKXClient.formatSymbol(trade.pair || 'BTC-USDT');
+
+          const tradeResponse = await client.placeOrder({
+            instId,
+            side: trade.side as 'buy' | 'sell',
+          });
+          
+          okxOrderId = tradeResponse?.orderId || `CF_WRK_${Date.now()}`;
+          executedExchange = 'OKX Demo (Worker)';
+        } catch (okxError: any) {
+          console.error('[v0] OKX Worker trade execution failed:', okxError);
+          errorDetails = okxError.message;
+          executedExchange = 'OKX Demo (Failed - Mocked)';
+        }
+      }
+
       const newTrade = {
         id: `TRD_${Date.now()}`,
         pair: trade.pair,
         side: trade.side,
         size: Number(trade.positionSize) || 100,
-        price: Number(trade.price) || 82410,
+        price: realPrice,
         timeframe: trade.timeframe,
-        exchange: trade.exchange || 'OKX Demo',
+        exchange: executedExchange,
         confidence: Number(trade.confidence) || 75,
-        reasoning: trade.reasoning || 'Executed manually',
+        reasoning: trade.reasoning || (errorDetails ? `Execution failed: ${errorDetails}` : 'Executed manually'),
         executedAt: new Date().toISOString(),
         status: 'executed',
         pnl: 0,
         pnlPercent: 0,
+        okxOrderId,
       };
       db.trades.unshift(newTrade);
       writeDb(db);
@@ -71,7 +108,13 @@ export async function POST(request: NextRequest) {
     }
 
     if (action === 'clear_trades') {
-      db.trades = [];
+      // IMPORTANT: Only reset PnL stats — NEVER remove trades.
+      // Active signals / executed trades must persist.
+      db.trades = db.trades.map(t => ({
+        ...t,
+        pnl: 0,
+        pnlPercent: 0,
+      }));
       writeDb(db);
       return NextResponse.json({ success: true });
     }

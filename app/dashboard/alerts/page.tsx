@@ -29,7 +29,7 @@ export default function AlertsPage() {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-3xl font-bold">Alerts</h1>
-          <p className="text-sm text-muted-foreground">Real-time TradingView pipeline signal monitoring</p>
+          <p className="text-sm text-muted-foreground">Real-time trading signal monitoring</p>
         </div>
         <Button variant="outline" size="sm" onClick={refreshData} className="gap-2 text-white border-[#1e1e3a]">
           <RotateCw className="h-4 w-4" />
@@ -86,7 +86,7 @@ export default function AlertsPage() {
               {filteredSignals.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="py-8 text-center text-muted-foreground">
-                    No signals found. Awaiting automated Webhook signals from the TradingView pipeline.
+                    No signals found yet. Waiting for new alerts from your connected indicators.
                   </td>
                 </tr>
               ) : (

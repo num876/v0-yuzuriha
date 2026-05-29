@@ -16,7 +16,10 @@ function ensureDirectoryExistence(filePath: string) {
 interface Settings {
   autopilotThreshold: number;
   okxApiKey: string;
+  okxSecretKey?: string;
+  okxPassphrase?: string;
   alpacaApiKey: string;
+  alpacaSecretKey?: string;
   oandaApiKey: string;
   oandaAccountId: string;
   oandaEnvironment: string;
@@ -79,56 +82,16 @@ interface DatabaseSchema {
 }
 
 const defaultDb: DatabaseSchema = {
-  signals: [
-    {
-      id: 'SIG001',
-      pair: 'BTC-USDT',
-      timeframe: '1h',
-      type: 'buy',
-      confidence: 85,
-      price: 82410,
-      timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-      strength: 'strong',
-      assetClass: 'crypto',
-      reasoning: 'RSI oversold, 4h trend bullish',
-      status: 'executed',
-    },
-    {
-      id: 'SIG002',
-      pair: 'ETH-USDT',
-      timeframe: '4h',
-      type: 'sell',
-      confidence: 72,
-      price: 3410,
-      timestamp: new Date(Date.now() - 10 * 60 * 1000).toISOString(),
-      strength: 'strong',
-      assetClass: 'crypto',
-      reasoning: 'Double top pattern, EMA cross bearish',
-      status: 'executed',
-    },
-  ],
-  trades: [
-    {
-      id: 'TRD001',
-      pair: 'BTC-USDT',
-      side: 'buy',
-      size: 100,
-      price: 82410,
-      timeframe: '1h',
-      exchange: 'OKX Demo',
-      confidence: 85,
-      reasoning: 'RSI oversold, 4h trend bullish',
-      executedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-      status: 'executed',
-      pnl: 2.4,
-      pnlPercent: 2.4,
-    },
-  ],
+  signals: [],
+  trades: [],
   scheduledTrades: [],
   settings: {
     autopilotThreshold: 70,
-    okxApiKey: 'pk_test_***',
+    okxApiKey: 'f0403f48-7972-4006-9ed9-c4ebce8489b9',
+    okxSecretKey: '317B6D017BADB1A103990416E9A08C06',
+    okxPassphrase: 'passphrase_***',
     alpacaApiKey: 'pk_test_***',
+    alpacaSecretKey: 'sk_test_***',
     oandaApiKey: 'Bearer token_***',
     oandaAccountId: 'account_***',
     oandaEnvironment: 'practice',

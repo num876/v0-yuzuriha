@@ -7,20 +7,7 @@ import { Plus, Trash2, Edit2 } from 'lucide-react';
 import { useState } from 'react';
 
 export default function JournalPage() {
-  const [notes, setNotes] = useState([
-    {
-      id: 1,
-      pair: 'BTC/USDT',
-      date: '2024-01-05',
-      content: 'Strong breakout above $45k resistance with good volume confirmation. Entry was clean at support. Exit at first target with 7.3% profit.',
-    },
-    {
-      id: 2,
-      pair: 'ETH/USDT',
-      date: '2024-01-04',
-      content: 'Countertrend trade against the main trend. Should have waited for confirmation. Lesson: stick to primary trend only.',
-    },
-  ]);
+  const [notes, setNotes] = useState<{id: number, pair: string, date: string, content: string}[]>([]);
 
   const [isAdding, setIsAdding] = useState(false);
   const [newNote, setNewNote] = useState({ pair: '', content: '' });
@@ -92,29 +79,35 @@ export default function JournalPage() {
 
       {/* Notes List */}
       <div className="space-y-3">
-        {notes.map((note) => (
-          <div key={note.id} className="glass-card card-hover-lift">
-            <div className="flex items-start justify-between mb-3">
-              <div>
-                <h3 className="font-mono font-bold text-lg">{note.pair}</h3>
-                <p className="text-xs text-muted-foreground">{note.date}</p>
-              </div>
-              <div className="flex gap-2">
-                <Button variant="ghost" size="sm">
-                  <Edit2 className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setNotes(notes.filter(n => n.id !== note.id))}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-            <p className="text-sm leading-relaxed text-foreground">{note.content}</p>
+        {notes.length === 0 ? (
+          <div className="glass-card text-center py-8 text-muted-foreground text-sm">
+            No journal entries yet. Click "Add note" to start documenting your trades.
           </div>
-        ))}
+        ) : (
+          notes.map((note) => (
+            <div key={note.id} className="glass-card card-hover-lift">
+              <div className="flex items-start justify-between mb-3">
+                <div>
+                  <h3 className="font-mono font-bold text-lg">{note.pair}</h3>
+                  <p className="text-xs text-muted-foreground">{note.date}</p>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="ghost" size="sm">
+                    <Edit2 className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setNotes(notes.filter(n => n.id !== note.id))}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              <p className="text-sm leading-relaxed text-foreground">{note.content}</p>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

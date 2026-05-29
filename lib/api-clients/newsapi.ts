@@ -70,30 +70,5 @@ export async function getNews(query: string): Promise<NewsArticle[]> {
 }
 
 function getMockNews(): NewsArticle[] {
-  return [
-    {
-      title: 'Bitcoin hits new record high amid institutional adoption',
-      description: 'Major financial institutions announce new crypto initiatives',
-      source: { name: 'CoinTelegraph' },
-      publishedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-      url: '#',
-      sentiment: 'positive',
-    },
-    {
-      title: 'Ethereum foundation releases latest protocol upgrade',
-      description: 'New improvements to network efficiency and scalability',
-      source: { name: 'The Block' },
-      publishedAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
-      url: '#',
-      sentiment: 'positive',
-    },
-    {
-      title: 'Solana ecosystem experiencing rapid growth',
-      description: 'Developer activity reaches all-time high',
-      source: { name: 'Crypto Briefing' },
-      publishedAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
-      url: '#',
-      sentiment: 'positive',
-    },
-  ];
+  return [];
 }

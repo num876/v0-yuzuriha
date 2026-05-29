@@ -3,46 +3,10 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Download, Trash2 } from 'lucide-react';
+import { useDashboard } from '@/app/context/DashboardContext';
 
 export default function HistoryPage() {
-  const trades = [
-    {
-      id: 'TRD001',
-      pair: 'BTC/USDT',
-      type: 'buy',
-      size: 0.5,
-      price: 43200,
-      pnl: 1540,
-      pnlPercent: 7.3,
-      timeframe: '1h',
-      date: '2024-01-05 14:32',
-      exchange: 'OKX Demo',
-    },
-    {
-      id: 'TRD002',
-      pair: 'ETH/USDT',
-      type: 'sell',
-      size: 5.0,
-      price: 2310,
-      pnl: 1050,
-      pnlPercent: 9.4,
-      timeframe: '4h',
-      date: '2024-01-05 12:15',
-      exchange: 'OKX Demo',
-    },
-    {
-      id: 'TRD003',
-      pair: 'SOL/USDT',
-      type: 'buy',
-      size: 25.0,
-      price: 98.5,
-      pnl: 167.5,
-      pnlPercent: 6.8,
-      timeframe: '1h',
-      date: '2024-01-04 09:22',
-      exchange: 'Alpaca',
-    },
-  ];
+  const { activeSignals: trades } = useDashboard();
 
   return (
     <div className="space-y-6 p-6">
@@ -93,23 +57,31 @@ export default function HistoryPage() {
               </tr>
             </thead>
             <tbody>
-              {trades.map((trade) => (
-                <tr key={trade.id} className="border-b border-[#1e1e3a]/50 hover:bg-[#111128]/60 transition-all duration-200">
-                  <td className="py-3 px-4 font-mono text-xs text-muted-foreground">{trade.id}</td>
-                  <td className="py-3 px-4 font-mono font-semibold">{trade.pair}</td>
-                  <td className={`py-3 px-4 text-center text-xs font-semibold ${trade.type === 'buy' ? 'text-success' : 'text-destructive'}`}>
-                    {trade.type.toUpperCase()}
+              {trades.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="py-8 text-center text-muted-foreground text-sm">
+                    No trade history found.
                   </td>
-                  <td className="py-3 px-4 text-right">{trade.size}</td>
-                  <td className="py-3 px-4 text-right">${trade.price.toFixed(2)}</td>
-                  <td className="py-3 px-4 text-center text-xs">{trade.timeframe}</td>
-                  <td className={`py-3 px-4 text-right font-semibold ${trade.pnl >= 0 ? 'text-success' : 'text-destructive'}`}>
-                    <div>${trade.pnl.toFixed(2)}</div>
-                    <div className="text-xs">{trade.pnlPercent >= 0 ? '+' : ''}{trade.pnlPercent.toFixed(1)}%</div>
-                  </td>
-                  <td className="py-3 px-4 text-xs text-muted-foreground">{trade.date}</td>
                 </tr>
-              ))}
+              ) : (
+                trades.map((trade) => (
+                  <tr key={trade.id} className="border-b border-[#1e1e3a]/50 hover:bg-[#111128]/60 transition-all duration-200">
+                    <td className="py-3 px-4 font-mono text-xs text-muted-foreground">{trade.id}</td>
+                    <td className="py-3 px-4 font-mono font-semibold">{trade.pair}</td>
+                    <td className={`py-3 px-4 text-center text-xs font-semibold ${trade.side === 'buy' ? 'text-success' : 'text-destructive'}`}>
+                      {trade.side.toUpperCase()}
+                    </td>
+                    <td className="py-3 px-4 text-right">{trade.size}</td>
+                    <td className="py-3 px-4 text-right">${trade.price.toFixed(2)}</td>
+                    <td className="py-3 px-4 text-center text-xs">{trade.timeframe}</td>
+                    <td className={`py-3 px-4 text-right font-semibold ${(trade.pnl || 0) >= 0 ? 'text-success' : 'text-destructive'}`}>
+                      <div>${(trade.pnl || 0).toFixed(2)}</div>
+                      <div className="text-xs">{(trade.pnlPercent || 0) >= 0 ? '+' : ''}{(trade.pnlPercent || 0).toFixed(1)}%</div>
+                    </td>
+                    <td className="py-3 px-4 text-xs text-muted-foreground">{new Date(trade.executedAt).toLocaleString()}</td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

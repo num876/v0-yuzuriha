@@ -47,7 +47,7 @@ export default function DashboardPage() {
   }, [watchlist, subscribe, selectedAsset]);
 
   const price = getPrice(selectedAsset);
-  const currentPriceValue = price ? price.current : 82410;
+  const currentPriceValue = price ? price.current : 0;
 
   // Handle Immediate Trade execution
   const handleExecuteTrade = (side: 'buy' | 'sell') => {
@@ -106,7 +106,7 @@ export default function DashboardPage() {
   // Calculate stats
   const totalTrades = activeSignals.length;
   const winRate = totalTrades > 0 
-    ? Math.round((activeSignals.filter(t => (t.pnl || 0) >= 0).length / totalTrades) * 100) 
+    ? Math.round((activeSignals.filter(t => (t.pnl || 0) > 0).length / totalTrades) * 100) 
     : 0;
   const totalPnl = activeSignals.reduce((acc, t) => acc + (t.pnl || 0), 0);
 
@@ -187,7 +187,7 @@ export default function DashboardPage() {
           <div className="glass-card-lg max-w-md w-full p-6 border-red-500/40 bg-[#0d0d1e] shadow-[0_0_50px_rgba(239,68,68,0.25)] space-y-4 text-left">
             <div className="flex items-center gap-3 text-red-500">
               <ShieldAlert className="h-8 w-8 animate-bounce" />
-              <h3 className="text-xl font-bold">Confirm Live Order Execution</h3>
+              <h3 className="text-xl font-bold">Authorize Capital Deployment</h3>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
               WARNING: You are about to place a real order on your live exchange for **{pendingTrade?.pair}**. Real money will be spent. Proceed?
@@ -434,11 +434,10 @@ export default function DashboardPage() {
         {/* RIGHT COLUMN - Signals, Executions, Stats, Alerts (col-span-4) */}
         <div className="flex flex-col gap-6 lg:col-span-4">
           
-          {/* Active Signals (Executed Trades) */}
           <div className="glass-card max-h-[300px] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                Active Signals (Executed)
+                Recent Executed Trades
               </h2>
               {activeSignals.length > 0 && (
                 <Button 
@@ -488,14 +487,13 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {/* Waiting to Execute (Scheduled Trades) */}
           <div className="glass-card max-h-[250px] overflow-y-auto">
             <h2 className="mb-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              Waiting to Execute (Pre-scheduled)
+              Upcoming Trades (Waiting to Execute)
             </h2>
             {scheduledTrades.length === 0 ? (
               <p className="text-xs text-muted-foreground italic leading-normal">
-                No orders queued for execution.
+                Trades waiting for their conditions to be met
               </p>
             ) : (
               <div className="space-y-2">
@@ -535,10 +533,15 @@ export default function DashboardPage() {
                 Portfolio Performance Statistics
               </h2>
               <button 
-                onClick={clearTrades}
-                className="text-[10px] text-muted-foreground hover:text-destructive font-semibold flex items-center gap-1 transition-colors"
+                onClick={() => {
+                  if (window.confirm('Reset all PnL stats to zero? Your executed trades will NOT be removed.')) {
+                    clearTrades();
+                  }
+                }}
+                className="text-[10px] text-muted-foreground hover:text-cyan-400 font-semibold flex items-center gap-1 transition-colors"
+                title="Resets PnL counters to zero. Trades are preserved."
               >
-                🗑️ Clear History
+                📊 Reset Stats
               </button>
             </div>
             <div className="grid grid-cols-2 gap-3">

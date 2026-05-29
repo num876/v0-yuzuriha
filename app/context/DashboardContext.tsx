@@ -49,7 +49,10 @@ export interface ScheduledTrade {
 export interface Settings {
   autopilotThreshold: number;
   okxApiKey: string;
+  okxSecretKey?: string;
+  okxPassphrase?: string;
   alpacaApiKey: string;
+  alpacaSecretKey?: string;
   oandaApiKey: string;
   oandaAccountId: string;
   oandaEnvironment: string;
@@ -101,8 +104,11 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [settings, setSettings] = useState<Settings>({
     autopilotThreshold: 70,
-    okxApiKey: 'pk_test_***',
+    okxApiKey: 'f0403f48-7972-4006-9ed9-c4ebce8489b9',
+    okxSecretKey: '317B6D017BADB1A103990416E9A08C06',
+    okxPassphrase: 'passphrase_***',
     alpacaApiKey: 'pk_test_***',
+    alpacaSecretKey: 'sk_test_***',
     oandaApiKey: 'Bearer token_***',
     oandaAccountId: 'account_***',
     oandaEnvironment: 'practice',

@@ -1,17 +1,73 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { usePrices } from '@/app/context/PriceContext';
 import { useDashboard } from '@/app/context/DashboardContext';
+
+interface GlobalMarketData {
+  btcDominance: number | null;
+  totalMarketCap: number | null;
+  fearGreedIndex: number | null;
+  fearGreedLabel: string | null;
+  dxy: number | null;
+}
+
+function formatMarketCap(value: number | null): string {
+  if (value === null) return '—';
+  if (value >= 1e12) return `$${(value / 1e12).toFixed(2)}T`;
+  if (value >= 1e9) return `$${(value / 1e9).toFixed(1)}B`;
+  if (value >= 1e6) return `$${(value / 1e6).toFixed(1)}M`;
+  return `$${value.toLocaleString()}`;
+}
+
+function getFearGreedColor(index: number | null): string {
+  if (index === null) return 'text-foreground';
+  if (index <= 25) return 'text-red-500';       // Extreme Fear
+  if (index <= 45) return 'text-orange-400';     // Fear
+  if (index <= 55) return 'text-yellow-400';     // Neutral
+  if (index <= 75) return 'text-[#22c55e]';      // Greed
+  return 'text-emerald-400';                      // Extreme Greed
+}
+
+function LoadingDots() {
+  return <span className="font-mono font-semibold text-muted-foreground animate-pulse">···</span>;
+}
 
 export function TopBar() {
   const { isConnected } = usePrices();
   const { settings, updateSettings } = useDashboard();
   const [mounted, setMounted] = useState(false);
+  const [globalData, setGlobalData] = useState<GlobalMarketData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchGlobalData = useCallback(async () => {
+    try {
+      const response = await fetch('/api/global-market');
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data: GlobalMarketData = await response.json();
+      setGlobalData(data);
+      setIsLoading(false);
+    } catch (error) {
+      console.error('[TopBar] Failed to fetch global market data:', error);
+      setIsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+
+    // Initial fetch
+    fetchGlobalData();
+
+    // Poll every 60 seconds
+    const interval = setInterval(fetchGlobalData, 60_000);
+
+    return () => clearInterval(interval);
+  }, [mounted, fetchGlobalData]);
 
   if (!mounted) return null;
 
@@ -49,43 +105,70 @@ export function TopBar() {
           </span>
         </div>
 
-        {/* Foundry Node */}
+        {/* Data Connection */}
         <div className="flex items-center gap-2 border-l border-[#1e1e3a]/50 pl-6">
-          <span>Foundry Node:</span>
+          <span>Data Connection:</span>
           <span className="inline-flex items-center gap-1 font-semibold text-foreground">
             <span className="h-1.5 w-1.5 rounded-full bg-[#06b6d4]" />
             CONNECTED
           </span>
         </div>
 
-        {/* BTC Dominance */}
+        {/* BTC Dominance — Live */}
         <div className="flex items-center gap-2 border-l border-[#1e1e3a]/50 pl-6">
           <span>BTC Dominance:</span>
-          <span className="font-mono font-semibold text-foreground">54.6%</span>
+          {isLoading ? <LoadingDots /> : (
+            <span className="font-mono font-semibold text-foreground">
+              {globalData?.btcDominance !== null && globalData?.btcDominance !== undefined
+                ? `${globalData.btcDominance}%`
+                : '—'}
+            </span>
+          )}
         </div>
 
-        {/* Total Cap */}
+        {/* Total Cap — Live */}
         <div className="flex items-center gap-2 border-l border-[#1e1e3a]/50 pl-6">
           <span>Total Cap:</span>
-          <span className="font-mono font-semibold text-foreground">$2.45T</span>
+          {isLoading ? <LoadingDots /> : (
+            <span className="font-mono font-semibold text-foreground">
+              {formatMarketCap(globalData?.totalMarketCap ?? null)}
+            </span>
+          )}
         </div>
 
-        {/* Fear & Greed */}
+        {/* Fear & Greed — Live */}
         <div className="flex items-center gap-2 border-l border-[#1e1e3a]/50 pl-6">
           <span>Fear & Greed:</span>
-          <span className="font-mono font-semibold text-foreground">64</span>
+          {isLoading ? <LoadingDots /> : (
+            <span className={`font-mono font-semibold ${getFearGreedColor(globalData?.fearGreedIndex ?? null)}`}>
+              {globalData?.fearGreedIndex !== null && globalData?.fearGreedIndex !== undefined
+                ? globalData.fearGreedIndex
+                : '—'}
+              {globalData?.fearGreedLabel && (
+                <span className="ml-1 text-[10px] font-normal opacity-70">
+                  ({globalData.fearGreedLabel})
+                </span>
+              )}
+            </span>
+          )}
         </div>
 
-        {/* DXY */}
+        {/* DXY — Live */}
         <div className="flex items-center gap-2 border-l border-[#1e1e3a]/50 pl-6 font-mono">
           <span>DXY:</span>
-          <span className="font-semibold text-foreground">104.2</span>
+          {isLoading ? <LoadingDots /> : (
+            <span className="font-semibold text-foreground">
+              {globalData?.dxy !== null && globalData?.dxy !== undefined
+                ? globalData.dxy.toFixed(2)
+                : '—'}
+            </span>
+          )}
         </div>
       </div>
 
       {/* Autopilot Switch */}
       <div className="flex items-center gap-3 ml-auto">
-        <span className="text-muted-foreground text-xs">Autopilot Orchestration:</span>
+        <span className="text-muted-foreground text-xs">Automated Trading:</span>
         <button
           onClick={handleAutopilotToggle}
           className={`relative inline-flex h-4 w-8 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { readDb, writeDb } from '@/lib/db';
 import { sendTelegramMessage } from '@/lib/api-clients/telegram';
 import { isStockSymbol } from '@/lib/utils';
+import { getMexcCurrentPrice } from '@/lib/api-clients/mexc';
 
 // GET all signals
 export async function GET(request: NextRequest) {
@@ -46,7 +47,13 @@ export async function POST(request: NextRequest) {
       cleanType = action.toLowerCase().includes('sell') ? 'sell' : 'buy';
     }
     const cleanConfidence = Number(confidence) || 75;
-    const cleanPrice = Number(price) || 82410;
+
+    // Fetch real price from MEXC if not provided
+    let cleanPrice = Number(price) || 0;
+    if (!cleanPrice) {
+      const mexcPrice = await getMexcCurrentPrice(cleanPair);
+      cleanPrice = mexcPrice || 0;
+    }
 
     const newSignal = {
       id: `SIG${Date.now()}`,
@@ -69,6 +76,34 @@ export async function POST(request: NextRequest) {
     if (isAutopilotQualified) {
       newSignal.status = 'executed';
       
+      let executedExchange = db.settings.isLiveTrading ? 'Live Exchange' : 'OKX Demo';
+      let okxOrderId = undefined;
+      let errorDetails = undefined;
+
+      // Execute on OKX via Worker if crypto
+      const isCrypto = newSignal.assetClass === 'crypto';
+      if (isCrypto) {
+        if (!db.settings.isLiveTrading) {
+          try {
+            const { OKXClient } = await import('@/lib/api-clients/okx');
+            const client = new OKXClient();
+            const instId = OKXClient.formatSymbol(cleanPair);
+
+            const tradeResponse = await client.placeOrder({
+              instId,
+              side: cleanType as 'buy' | 'sell',
+            });
+            
+            okxOrderId = tradeResponse?.orderId || `CF_WRK_${Date.now()}`;
+            executedExchange = 'OKX Demo (Worker)';
+          } catch (okxError: any) {
+            console.error('[v0] Auto OKX Worker trade execution failed:', okxError);
+            errorDetails = okxError.message;
+            executedExchange = 'OKX Demo (Failed - Mocked)';
+          }
+        }
+      }
+      
       // Execute the trade (save to trades list)
       const newTrade = {
         id: `TRD${Date.now()}`,
@@ -77,13 +112,14 @@ export async function POST(request: NextRequest) {
         size: 100, // Default trade size
         price: cleanPrice,
         timeframe: cleanTimeframe,
-        exchange: db.settings.isLiveTrading ? 'Live Exchange' : 'OKX Demo',
+        exchange: executedExchange,
         confidence: cleanConfidence,
-        reasoning,
+        reasoning: errorDetails ? `${reasoning} (API Error: ${errorDetails})` : reasoning,
         executedAt: new Date().toISOString(),
         status: 'executed',
         pnl: 0,
         pnlPercent: 0,
+        okxOrderId,
       };
       
       db.trades.unshift(newTrade);

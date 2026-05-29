@@ -301,6 +301,48 @@ export default function SettingsPage() {
               <p className="text-xs text-muted-foreground">Demo mode - set exchange to Paper Trading</p>
             </div>
 
+            <div className="space-y-2">
+              <label className="block text-sm font-medium">OKX Secret key</label>
+              <div className="flex gap-2">
+                <Input
+                  type={showApiKeys ? 'text' : 'password'}
+                  placeholder="sk_test_..."
+                  value={localSettings.okxSecretKey || ''}
+                  onChange={(e) => setLocalSettings({ ...localSettings, okxSecretKey: e.target.value })}
+                  className="w-full rounded-xl border border-[#1e1e3a]/50 bg-[#111128]/80 px-3 py-2.5 text-sm transition-all duration-200 focus:border-[#8b5cf6]/50 focus:ring-1 focus:ring-[#8b5cf6]/20 hover:border-[#8b5cf6]/30 outline-none"
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowApiKeys(!showApiKeys)}
+                  className="border-[#1e1e3a] hover:bg-[#8b5cf6]/10 text-white"
+                >
+                  {showApiKeys ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-sm font-medium">OKX Passphrase</label>
+              <div className="flex gap-2">
+                <Input
+                  type={showApiKeys ? 'text' : 'password'}
+                  placeholder="passphrase..."
+                  value={localSettings.okxPassphrase || ''}
+                  onChange={(e) => setLocalSettings({ ...localSettings, okxPassphrase: e.target.value })}
+                  className="w-full rounded-xl border border-[#1e1e3a]/50 bg-[#111128]/80 px-3 py-2.5 text-sm transition-all duration-200 focus:border-[#8b5cf6]/50 focus:ring-1 focus:ring-[#8b5cf6]/20 hover:border-[#8b5cf6]/30 outline-none"
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowApiKeys(!showApiKeys)}
+                  className="border-[#1e1e3a] hover:bg-[#8b5cf6]/10 text-white"
+                >
+                  {showApiKeys ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </div>
+            </div>
+
             {/* Alpaca */}
             <div className="space-y-2">
               <label className="block text-sm font-medium">Alpaca API key</label>
@@ -310,6 +352,27 @@ export default function SettingsPage() {
                   placeholder="pk_test_..."
                   value={localSettings.alpacaApiKey}
                   onChange={(e) => setLocalSettings({ ...localSettings, alpacaApiKey: e.target.value })}
+                  className="w-full rounded-xl border border-[#1e1e3a]/50 bg-[#111128]/80 px-3 py-2.5 text-sm transition-all duration-200 focus:border-[#8b5cf6]/50 focus:ring-1 focus:ring-[#8b5cf6]/20 hover:border-[#8b5cf6]/30 outline-none"
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowApiKeys(!showApiKeys)}
+                  className="border-[#1e1e3a] hover:bg-[#8b5cf6]/10 text-white"
+                >
+                  {showApiKeys ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-sm font-medium">Alpaca Secret key</label>
+              <div className="flex gap-2">
+                <Input
+                  type={showApiKeys ? 'text' : 'password'}
+                  placeholder="sk_test_..."
+                  value={localSettings.alpacaSecretKey || ''}
+                  onChange={(e) => setLocalSettings({ ...localSettings, alpacaSecretKey: e.target.value })}
                   className="w-full rounded-xl border border-[#1e1e3a]/50 bg-[#111128]/80 px-3 py-2.5 text-sm transition-all duration-200 focus:border-[#8b5cf6]/50 focus:ring-1 focus:ring-[#8b5cf6]/20 hover:border-[#8b5cf6]/30 outline-none"
                 />
                 <Button

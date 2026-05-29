@@ -26,33 +26,33 @@ export default function LandingPage() {
   const features = [
     {
       icon: Zap,
-      title: 'Ultra-Low Latency Execution',
-      description: 'Instantly route automated orders directly from webhook triggers with fractional-second latency.',
+      title: 'Lightning-Fast Trades',
+      description: 'Instantly execute automated orders the moment your trading conditions are met.',
     },
     {
       icon: Cpu,
-      title: 'LLM-Orchestrated Risk Analysis',
-      description: 'Evaluate market conditions on-the-fly using advanced cognitive reasoning models with real-time confidence grading.',
+      title: 'Smart Risk Management',
+      description: 'Evaluate market conditions instantly using advanced AI models that grade your trades for confidence.',
     },
     {
       icon: BarChart3,
-      title: 'Real-Time Portfolio Intelligence',
-      description: 'Track positions across asset classes with responsive analytics, Sharpe calculations, and risk tracking.',
+      title: 'Live Portfolio Tracking',
+      description: 'Track all your positions across markets with easy-to-understand analytics and risk monitoring.',
     },
     {
       icon: BookOpen,
-      title: 'Alternative Data Sentiment Feed',
-      description: 'Aggregate market intelligence and alternative news sources analyzed for NLP sentiment scoring.',
+      title: 'Market Sentiment Analysis',
+      description: 'Stay ahead of the curve by analyzing news and market sentiment in real-time.',
     },
     {
       icon: Bell,
-      title: 'Instant Alert Distribution',
-      description: 'Sync transaction notifications, signal status updates, and trade reports directly to secure Telegram channels.',
+      title: 'Instant Notifications',
+      description: 'Get instant alerts, trade updates, and performance reports delivered straight to your Telegram.',
     },
     {
       icon: TrendingUp,
-      title: 'Foundry Ontology Sync',
-      description: 'Log structured telemetry, trade records, and execution telemetry into persistent cloud ontologies.',
+      title: 'Secure Data Logging',
+      description: 'Keep a permanent, secure record of all your trades, strategies, and performance metrics.',
     },
   ];
 
@@ -66,26 +66,26 @@ export default function LandingPage() {
     { 
       number: '02', 
       icon: BarChart3, 
-      label: 'Foundry Ontology', 
-      desc: 'payload is ingested, parsed, and logged persistently into global ontologies.' 
+      label: 'Data Processing', 
+      desc: 'Your trade data is processed securely and logged for your records.' 
     },
     { 
       number: '03', 
       icon: Cpu, 
-      label: 'Make.com', 
-      desc: 'orchestrates the signal logic, checking parameters and validation policies.' 
+      label: 'Logic Engine', 
+      desc: 'Smart checks verify your trade parameters before execution to ensure safety.' 
     },
     { 
       number: '04', 
       icon: TrendingUp, 
-      label: 'Cloudflare Edge', 
-      desc: 'low-latency routing and secure API signature validation at closest edge nodes.' 
+      label: 'Secure Routing', 
+      desc: 'Fast and secure routing ensures your trade gets to the exchange without delay.' 
     },
     { 
       number: '05', 
       icon: Bell, 
-      label: 'Exchanges', 
-      desc: 'instant fills are executed via OKX (crypto) or Alpaca (stocks) API keys.' 
+      label: 'Live Execution', 
+      desc: 'Trades are executed instantly on your connected exchanges.' 
     },
   ];
 
@@ -113,15 +113,15 @@ export default function LandingPage() {
           <div className="space-y-6 max-w-3xl reveal-inview">
             <div className="inline-flex items-center gap-2 rounded-full border border-[#8b5cf6]/30 bg-[#8b5cf6]/10 px-4 py-1.5 text-sm text-[#8b5cf6] backdrop-blur-sm">
               <Zap className="h-3.5 w-3.5" />
-              Next-Generation Autonomous Trading
+              Smart, Automated Trading
               <ChevronRight className="h-3.5 w-3.5" />
             </div>
             <h1 className="text-5xl md:text-7xl font-bold leading-[1.1] tracking-tight font-[family-name:var(--font-display)]">
-              Autonomous execution engines{' '}
-              <span className="shimmer-text">orchestrated by intelligence</span>
+              Automated trading powered by{' '}
+              <span className="shimmer-text">smart analytics</span>
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl leading-relaxed">
-              Execute low-latency strategies directly from custom indicators. Orchestrated with real-time exchange integrations, live portfolio analytics, and Claude-powered quantitative confidence models.
+              Execute trades instantly from your custom indicators. Manage your portfolio in real-time with smart, AI-driven insights that help you trade with confidence.
             </p>
           </div>
           <div className="mt-10 flex flex-wrap items-center gap-4 reveal-inview" style={{ transitionDelay: '150ms' }}>
@@ -137,15 +137,15 @@ export default function LandingPage() {
           <div className="mt-16 grid grid-cols-3 gap-4 sm:gap-8 max-w-lg reveal-inview" style={{ transitionDelay: '300ms' }}>
             <div>
               <AnimatedCounter end={156} suffix="+" className="text-2xl sm:text-3xl font-bold gradient-text font-[family-name:var(--font-display)]" />
-              <div className="text-xs sm:text-sm text-muted-foreground mt-1">Total Signals Routed</div>
+              <div className="text-xs sm:text-sm text-muted-foreground mt-1">Total Trades Executed</div>
             </div>
             <div>
               <AnimatedCounter end={68} suffix="%" className="text-2xl sm:text-3xl font-bold gradient-text-green font-[family-name:var(--font-display)]" />
-              <div className="text-xs sm:text-sm text-muted-foreground mt-1">Mean Confidence Win Rate</div>
+              <div className="text-xs sm:text-sm text-muted-foreground mt-1">Average Win Rate</div>
             </div>
             <div>
               <AnimatedCounter end={24} suffix="/7" className="text-2xl sm:text-3xl font-bold gradient-text font-[family-name:var(--font-display)]" />
-              <div className="text-xs sm:text-sm text-muted-foreground mt-1">System Availability</div>
+              <div className="text-xs sm:text-sm text-muted-foreground mt-1">System Uptime</div>
             </div>
           </div>
         </div>
