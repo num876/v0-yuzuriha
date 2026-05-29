@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const db = readDb();
+    const db = await readDb();
 
     // Handle OKX Demo execution for Crypto via Worker
     if (assetClass === 'crypto') {

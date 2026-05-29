@@ -5,7 +5,7 @@ import { getMexcPrices } from '@/lib/api-clients/mexc';
 // Real PNL endpoint — calculates from actual trades in DB using live MEXC prices
 export async function GET(request: NextRequest) {
   try {
-    const db = readDb();
+    const db = await readDb();
     const trades = db.trades || [];
 
     if (trades.length === 0) {

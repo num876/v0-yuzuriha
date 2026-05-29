@@ -514,11 +514,18 @@ export default function DashboardPage() {
                     </div>
                     <div className="flex justify-between text-muted-foreground text-[11px]">
                       <span>Price: ${(trade.price || 0).toLocaleString()}</span>
-                      <span>Size: ${trade.size}</span>
+                      <span title={`Target value in USD. Backend securely calculates crypto size (e.g. ~${(trade.size / (trade.price || 1)).toFixed(4)} BTC) for API.`}>Target Value: ${trade.size}</span>
                     </div>
-                    <div className="flex justify-between items-center text-[10px] pt-1 border-t border-[#1e1e3a]/20">
-                      <span className="text-muted-foreground">{new Date(trade.executedAt).toLocaleTimeString()}</span>
-                      <span className="text-[#06b6d4] font-mono">{trade.exchange}</span>
+                    <div className="flex flex-col gap-1 pt-1 border-t border-[#1e1e3a]/20">
+                      <div className="flex justify-between items-center text-[10px]">
+                        <span className="text-muted-foreground">{new Date(trade.executedAt).toLocaleTimeString()}</span>
+                        <span className={trade.exchange.includes('Failed') ? 'text-red-500 font-mono font-bold' : 'text-[#06b6d4] font-mono'}>{trade.exchange}</span>
+                      </div>
+                      {trade.exchange.includes('Failed') && (
+                        <div className="text-[10px] text-red-400 bg-red-500/10 p-1.5 rounded mt-0.5 whitespace-pre-wrap break-words">
+                          {trade.reasoning}
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}

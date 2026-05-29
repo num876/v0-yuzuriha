@@ -1,7 +1,9 @@
 import fs from 'fs';
 import path from 'path';
+import { kv } from '@vercel/kv';
 
 const DB_FILE = path.join(process.cwd(), 'data', 'db.json');
+const KV_KEY = 'yuzuriha_db_v1';
 
 // Ensure data directory exists
 function ensureDirectoryExistence(filePath: string) {
@@ -60,6 +62,7 @@ interface Trade {
   status: string;
   pnl?: number;
   pnlPercent?: number;
+  okxOrderId?: string;
 }
 
 interface ScheduledTrade {
@@ -87,9 +90,9 @@ const defaultDb: DatabaseSchema = {
   scheduledTrades: [],
   settings: {
     autopilotThreshold: 70,
-    okxApiKey: 'f0403f48-7972-4006-9ed9-c4ebce8489b9',
-    okxSecretKey: '317B6D017BADB1A103990416E9A08C06',
-    okxPassphrase: 'passphrase_***',
+    okxApiKey: '677e76fb-3a66-47ab-8b0a-f6edc49708ad',
+    okxSecretKey: '750FF5FAF55F00F44526E8CDF354988B',
+    okxPassphrase: 'Yuzuriha2025_',
     alpacaApiKey: 'pk_test_***',
     alpacaSecretKey: 'sk_test_***',
     oandaApiKey: 'Bearer token_***',
@@ -105,8 +108,19 @@ const defaultDb: DatabaseSchema = {
   },
 };
 
-export function readDb(): DatabaseSchema {
+export async function readDb(): Promise<DatabaseSchema> {
   try {
+    // Attempt to read from Vercel KV first (Production / Cloud persistence)
+    if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
+      const data = await kv.get<DatabaseSchema>(KV_KEY);
+      if (data) return data;
+      
+      // If KV is empty but configured, initialize it with default DB
+      await kv.set(KV_KEY, defaultDb);
+      return defaultDb;
+    }
+
+    // Fallback to local filesystem (Local Development)
     ensureDirectoryExistence(DB_FILE);
     if (!fs.existsSync(DB_FILE)) {
       fs.writeFileSync(DB_FILE, JSON.stringify(defaultDb, null, 2), 'utf-8');
@@ -115,16 +129,23 @@ export function readDb(): DatabaseSchema {
     const data = fs.readFileSync(DB_FILE, 'utf-8');
     return JSON.parse(data);
   } catch (error) {
-    console.error('Failed to read local DB file:', error);
+    console.error('Failed to read DB:', error);
     return defaultDb;
   }
 }
 
-export function writeDb(db: DatabaseSchema) {
+export async function writeDb(db: DatabaseSchema): Promise<void> {
   try {
+    // Attempt to write to Vercel KV
+    if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
+      await kv.set(KV_KEY, db);
+      return;
+    }
+
+    // Fallback to local filesystem
     ensureDirectoryExistence(DB_FILE);
     fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), 'utf-8');
   } catch (error) {
-    console.error('Failed to write local DB file:', error);
+    console.error('Failed to write DB:', error);
   }
 }

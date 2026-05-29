@@ -7,7 +7,7 @@ import { getMexcCurrentPrice } from '@/lib/api-clients/mexc';
 // GET all signals
 export async function GET(request: NextRequest) {
   try {
-    const db = readDb();
+    const db = await readDb();
     return NextResponse.json({
       signals: db.signals,
       timestamp: new Date().toISOString(),
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
       action, // TradingView action e.g. BUY_STRONG, SELL
     } = body;
 
-    const db = readDb();
+    const db = await readDb();
 
     // Map input fields from standard or TradingView webhook simulator format
     const cleanPair = (pair || ticker || 'BTC-USDT').replace('USDT', '-USDT');
@@ -265,7 +265,7 @@ export async function POST(request: NextRequest) {
     }
 
     db.signals.unshift(newSignal);
-    writeDb(db);
+    await writeDb(db);
 
     return NextResponse.json({
       success: true,

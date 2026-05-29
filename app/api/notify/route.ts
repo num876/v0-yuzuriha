@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { type, message, channel = 'telegram' } = body;
 
-    const db = readDb();
+    const db = await readDb();
 
     let notificationText = message;
 

@@ -4,7 +4,7 @@ import { getMexcCurrentPrice } from '@/lib/api-clients/mexc';
 
 export async function GET(request: NextRequest) {
   try {
-    const db = readDb();
+    const db = await readDb();
     return NextResponse.json({
       trades: db.trades,
       scheduledTrades: db.scheduledTrades,
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { action, trade } = body;
-    const db = readDb();
+    const db = await readDb();
 
     if (action === 'schedule') {
       const scheduledTrade = {
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
         exchange: trade.exchange || 'OKX Demo',
       };
       db.scheduledTrades.push(scheduledTrade);
-      writeDb(db);
+      await writeDb(db);
       return NextResponse.json({ success: true, scheduledTrade });
     }
 
@@ -101,19 +101,19 @@ export async function POST(request: NextRequest) {
         okxOrderId,
       };
       db.trades.unshift(newTrade);
-      writeDb(db);
+      await writeDb(db);
       return NextResponse.json({ success: true, trade: newTrade });
     }
 
     if (action === 'delete_scheduled') {
       db.scheduledTrades = db.scheduledTrades.filter(t => t.id !== trade.id);
-      writeDb(db);
+      await writeDb(db);
       return NextResponse.json({ success: true });
     }
 
     if (action === 'delete_trade') {
       db.trades = db.trades.filter(t => t.id !== trade.id);
-      writeDb(db);
+      await writeDb(db);
       return NextResponse.json({ success: true });
     }
 
@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
         pnl: 0,
         pnlPercent: 0,
       }));
-      writeDb(db);
+      await writeDb(db);
       return NextResponse.json({ success: true });
     }
 

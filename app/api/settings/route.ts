@@ -3,7 +3,7 @@ import { readDb, writeDb } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
   try {
-    const db = readDb();
+    const db = await readDb();
     return NextResponse.json(db.settings);
   } catch (error) {
     console.error('[v0] Settings GET error:', error);
@@ -14,14 +14,14 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const db = readDb();
+    const db = await readDb();
     
     db.settings = {
       ...db.settings,
       ...body,
     };
     
-    writeDb(db);
+    await writeDb(db);
     return NextResponse.json({ success: true, settings: db.settings });
   } catch (error) {
     console.error('[v0] Settings POST error:', error);
