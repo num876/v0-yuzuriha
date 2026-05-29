@@ -139,7 +139,7 @@ export default function DashboardPage() {
       const baseAsset = trade.pair.split('-')[0];
       const quoteAsset = 'USDT';
       const sizeQuote = trade.size;
-      const sizeBase = trade.size / trade.price;
+      const sizeBase = trade.size / (trade.price || 1);
 
       const sentAmount = isBuy ? sizeQuote : sizeBase;
       const sentCurrency = isBuy ? quoteAsset : baseAsset;
@@ -513,7 +513,7 @@ export default function DashboardPage() {
                       </div>
                     </div>
                     <div className="flex justify-between text-muted-foreground text-[11px]">
-                      <span>Price: ${trade.price.toLocaleString()}</span>
+                      <span>Price: ${(trade.price || 0).toLocaleString()}</span>
                       <span>Size: ${trade.size}</span>
                     </div>
                     <div className="flex justify-between items-center text-[10px] pt-1 border-t border-[#1e1e3a]/20">

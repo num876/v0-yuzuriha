@@ -169,6 +169,33 @@ export async function POST(request: NextRequest) {
 
     if (matchedScheduledIndex !== -1) {
       const scheduledTrade = db.scheduledTrades[matchedScheduledIndex];
+      
+      let executedExchange = scheduledTrade.exchange || (db.settings.isLiveTrading ? 'Live Exchange' : 'OKX Demo');
+      let okxOrderId = undefined;
+      let errorDetails = undefined;
+
+      // Execute on OKX via Worker if crypto
+      const isCrypto = scheduledTrade.assetClass === 'crypto';
+      if (isCrypto && !db.settings.isLiveTrading) {
+        try {
+          const { OKXClient } = await import('@/lib/api-clients/okx');
+          const client = new OKXClient();
+          const instId = OKXClient.formatSymbol(scheduledTrade.pair);
+
+          const tradeResponse = await client.placeOrder({
+            instId,
+            side: scheduledTrade.side as 'buy' | 'sell',
+          });
+          
+          okxOrderId = tradeResponse?.orderId || `CF_WRK_${Date.now()}`;
+          executedExchange = 'OKX Demo (Worker)';
+        } catch (okxError: any) {
+          console.error('[v0] Scheduled OKX Worker trade execution failed:', okxError);
+          errorDetails = okxError.message;
+          executedExchange = 'OKX Demo (Failed - Mocked)';
+        }
+      }
+
       // Execute the scheduled trade
       const newTrade = {
         id: `TRD_SCH_${Date.now()}`,
@@ -177,11 +204,12 @@ export async function POST(request: NextRequest) {
         size: scheduledTrade.positionSize,
         price: cleanPrice,
         timeframe: scheduledTrade.timeframe,
-        exchange: scheduledTrade.exchange || (db.settings.isLiveTrading ? 'Live Exchange' : 'OKX Demo'),
+        exchange: executedExchange,
         confidence: cleanConfidence,
-        reasoning: `Executed via pre-scheduled trade trigger: ${scheduledTrade.framework}`,
+        reasoning: errorDetails ? `Scheduled trigger failed: ${errorDetails}` : `Executed via pre-scheduled trade trigger: ${scheduledTrade.framework}`,
         executedAt: new Date().toISOString(),
         status: 'executed',
+        okxOrderId,
       };
       db.trades.unshift(newTrade);
       
