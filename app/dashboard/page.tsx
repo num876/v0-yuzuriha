@@ -434,6 +434,45 @@ export default function DashboardPage() {
         {/* RIGHT COLUMN - Signals, Executions, Stats, Alerts (col-span-4) */}
         <div className="flex flex-col gap-6 lg:col-span-4">
           
+          <div className="glass-card max-h-[250px] overflow-y-auto">
+            <h2 className="mb-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              Upcoming Trades (Waiting to Execute)
+            </h2>
+            {scheduledTrades.length === 0 ? (
+              <p className="text-xs text-muted-foreground italic leading-normal">
+                Trades waiting for their conditions to be met
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {scheduledTrades.map((trade) => (
+                  <div key={trade.id} className="rounded-xl border border-[#1e1e3a]/40 bg-[#111128]/30 p-3 text-xs flex flex-col gap-1">
+                    <div className="flex justify-between items-center">
+                      <span className="font-mono font-bold text-white">{trade.pair}</span>
+                      <div className="flex items-center gap-2">
+                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${trade.side === 'buy' ? 'bg-success/15 text-success' : 'bg-destructive/15 text-destructive'}`}>
+                          {trade.side.toUpperCase()}
+                        </span>
+                        <button 
+                          onClick={() => deleteScheduledTrade(trade.id)}
+                          className="text-muted-foreground hover:text-red-500 transition-colors"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="flex justify-between text-muted-foreground text-[11px]">
+                      <span>Timeframe: {trade.timeframe}</span>
+                      <span>Target: ${trade.positionSize}</span>
+                    </div>
+                    <div className="text-[10px] text-[#8b5cf6] font-semibold">
+                      Trigger Framework: {trade.framework}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           <div className="glass-card max-h-[300px] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
@@ -480,45 +519,6 @@ export default function DashboardPage() {
                     <div className="flex justify-between items-center text-[10px] pt-1 border-t border-[#1e1e3a]/20">
                       <span className="text-muted-foreground">{new Date(trade.executedAt).toLocaleTimeString()}</span>
                       <span className="text-[#06b6d4] font-mono">{trade.exchange}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="glass-card max-h-[250px] overflow-y-auto">
-            <h2 className="mb-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              Upcoming Trades (Waiting to Execute)
-            </h2>
-            {scheduledTrades.length === 0 ? (
-              <p className="text-xs text-muted-foreground italic leading-normal">
-                Trades waiting for their conditions to be met
-              </p>
-            ) : (
-              <div className="space-y-2">
-                {scheduledTrades.map((trade) => (
-                  <div key={trade.id} className="rounded-xl border border-[#1e1e3a]/40 bg-[#111128]/30 p-3 text-xs flex flex-col gap-1">
-                    <div className="flex justify-between items-center">
-                      <span className="font-mono font-bold text-white">{trade.pair}</span>
-                      <div className="flex items-center gap-2">
-                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${trade.side === 'buy' ? 'bg-success/15 text-success' : 'bg-destructive/15 text-destructive'}`}>
-                          {trade.side.toUpperCase()}
-                        </span>
-                        <button 
-                          onClick={() => deleteScheduledTrade(trade.id)}
-                          className="text-muted-foreground hover:text-red-500 transition-colors"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </button>
-                      </div>
-                    </div>
-                    <div className="flex justify-between text-muted-foreground text-[11px]">
-                      <span>Timeframe: {trade.timeframe}</span>
-                      <span>Target: ${trade.positionSize}</span>
-                    </div>
-                    <div className="text-[10px] text-[#8b5cf6] font-semibold">
-                      Trigger Framework: {trade.framework}
                     </div>
                   </div>
                 ))}
