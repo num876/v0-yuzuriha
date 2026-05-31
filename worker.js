@@ -38,12 +38,36 @@ export default {
 
       const instrument = payload.instId || (payload.ticker ? payload.ticker.replace("USDT", "-USDT") : "BTC-USDT");
       
+      // Fetch current coin price from OKX
+      const priceRes = await fetch(
+        `https://www.okx.com/api/v5/market/ticker?instId=${instrument}`
+      );
+      const priceData = await priceRes.json();
+      
+      if (!priceData || !priceData.data || !priceData.data[0]) {
+        throw new Error(`Failed to fetch price for ${instrument}`);
+      }
+      
+      const coinPrice = parseFloat(priceData.data[0].last);
+
+      // Convert dollar amount to coin quantity
+      const targetUSD = parseFloat(payload.size || 100);
+      let coinQty = targetUSD / coinPrice;
+
+      // Enforce minimum OKX trade size (0.01 BTC for example)
+      const MIN_QTY = 0.01;
+      if (coinQty < MIN_QTY) coinQty = MIN_QTY;
+
+      // Round to 4 decimal places
+      const sz = coinQty.toFixed(4);
+      
       const orderBody = {
         instId: instrument,
         tdMode: "cash",
         side: (payload.signal || "buy").toLowerCase(),
         ordType: "market",
-        sz: payload.size || "0.001"
+        tgtCcy: "base_ccy", // Force OKX to interpret sz as the base crypto token amount
+        sz: sz
       };
 
       const bodyStr = JSON.stringify(orderBody);
@@ -97,7 +121,8 @@ export default {
       return new Response(JSON.stringify({ 
         success: true, 
         orderId: okxData.data[0].ordId,
-        message: "Order placed successfully" 
+        message: "Order placed successfully",
+        details: `Traded ${sz} ${instrument}`
       }), {
         headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
       });

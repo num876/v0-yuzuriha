@@ -60,13 +60,9 @@ export async function POST(request: NextRequest) {
           const client = new OKXClient();
           const instId = OKXClient.formatSymbol(trade.pair || 'BTC-USDT');
 
-          let sz = "0.001"; // Fallback minimum
-          if (trade.side === 'buy') {
-            sz = String(Number(trade.positionSize) || 100);
-          } else if (realPrice > 0) {
-            const calculatedSize = (Number(trade.positionSize) || 100) / realPrice;
-            sz = Math.max(0.001, calculatedSize).toFixed(4);
-          }
+          // Pass the raw USD target amount to the Cloudflare Worker.
+          // The Worker will fetch the live OKX price and calculate the exact BTC size.
+          const sz = String(Number(trade.positionSize) || 100);
 
           const tradeResponse = await client.placeOrder({
             instId,

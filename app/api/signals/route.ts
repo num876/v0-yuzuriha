@@ -89,13 +89,8 @@ export async function POST(request: NextRequest) {
             const client = new OKXClient();
             const instId = OKXClient.formatSymbol(cleanPair);
 
-            let sz = "0.001";
-            if (cleanType === 'buy') {
-              sz = "100"; // Autopilot defaults to $100
-            } else if (cleanPrice > 0) {
-              const calculatedSize = 100 / cleanPrice; 
-              sz = Math.max(0.001, calculatedSize).toFixed(4);
-            }
+            // Pass the raw USD target amount to the Cloudflare Worker.
+            const sz = cleanType === 'buy' ? "100" : "100";
 
             const tradeResponse = await client.placeOrder({
               instId,
@@ -194,13 +189,8 @@ export async function POST(request: NextRequest) {
           const client = new OKXClient();
           const instId = OKXClient.formatSymbol(scheduledTrade.pair);
 
-          let sz = "0.001";
-          if (scheduledTrade.side === 'buy') {
-            sz = String(Number(scheduledTrade.positionSize) || 100);
-          } else if (cleanPrice > 0) {
-            const calculatedSize = (Number(scheduledTrade.positionSize) || 100) / cleanPrice;
-            sz = Math.max(0.001, calculatedSize).toFixed(4);
-          }
+          // Pass the raw USD target amount to the Cloudflare Worker.
+          const sz = String(Number(scheduledTrade.positionSize) || 100);
 
           const tradeResponse = await client.placeOrder({
             instId,
