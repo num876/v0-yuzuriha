@@ -203,12 +203,16 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
 
   const addActiveSignal = useCallback(async (signal: ActiveSignal) => {
     try {
-      const res = await fetch('/api/trades', {
+      const res = await fetch('/api/signal', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-Internal-Source': 'dashboard'
+        },
         body: JSON.stringify({
-          action: 'execute',
-          trade: signal,
+          ticker: signal.pair.replace('-', ''),
+          signal: signal.side,
+          size: signal.positionSize || 100
         }),
       });
       if (res.ok) {
