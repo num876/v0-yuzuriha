@@ -90,8 +90,8 @@ const defaultDb: DatabaseSchema = {
   scheduledTrades: [],
   settings: {
     autopilotThreshold: 70,
-    okxApiKey: '677e76fb-3a66-47ab-8b0a-f6edc49708ad',
-    okxSecretKey: '750FF5FAF55F00F44526E8CDF354988B',
+    okxApiKey: '7ab93a5c-3582-419c-a9ac-1d17431181c2',
+    okxSecretKey: 'F29B5C22AA3DDD7136BA397308FF1A35',
     okxPassphrase: 'Yuzuriha2025_',
     alpacaApiKey: 'pk_test_***',
     alpacaSecretKey: 'sk_test_***',

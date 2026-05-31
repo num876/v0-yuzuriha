@@ -61,7 +61,9 @@ export async function POST(request: NextRequest) {
           const instId = OKXClient.formatSymbol(trade.pair || 'BTC-USDT');
 
           let sz = "0.001"; // Fallback minimum
-          if (realPrice > 0) {
+          if (trade.side === 'buy') {
+            sz = String(Number(trade.positionSize) || 100);
+          } else if (realPrice > 0) {
             const calculatedSize = (Number(trade.positionSize) || 100) / realPrice;
             sz = Math.max(0.001, calculatedSize).toFixed(4);
           }

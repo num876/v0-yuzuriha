@@ -106,8 +106,8 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [settings, setSettings] = useState<Settings>({
     autopilotThreshold: 70,
-    okxApiKey: 'f0403f48-7972-4006-9ed9-c4ebce8489b9',
-    okxSecretKey: '317B6D017BADB1A103990416E9A08C06',
+    okxApiKey: '7ab93a5c-3582-419c-a9ac-1d17431181c2',
+    okxSecretKey: 'F29B5C22AA3DDD7136BA397308FF1A35',
     okxPassphrase: 'passphrase_***',
     alpacaApiKey: 'pk_test_***',
     alpacaSecretKey: 'sk_test_***',

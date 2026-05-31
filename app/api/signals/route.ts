@@ -90,8 +90,10 @@ export async function POST(request: NextRequest) {
             const instId = OKXClient.formatSymbol(cleanPair);
 
             let sz = "0.001";
-            if (cleanPrice > 0) {
-              const calculatedSize = 100 / cleanPrice; // Autopilot defaults to $100
+            if (cleanType === 'buy') {
+              sz = "100"; // Autopilot defaults to $100
+            } else if (cleanPrice > 0) {
+              const calculatedSize = 100 / cleanPrice; 
               sz = Math.max(0.001, calculatedSize).toFixed(4);
             }
 
@@ -193,7 +195,9 @@ export async function POST(request: NextRequest) {
           const instId = OKXClient.formatSymbol(scheduledTrade.pair);
 
           let sz = "0.001";
-          if (cleanPrice > 0) {
+          if (scheduledTrade.side === 'buy') {
+            sz = String(Number(scheduledTrade.positionSize) || 100);
+          } else if (cleanPrice > 0) {
             const calculatedSize = (Number(scheduledTrade.positionSize) || 100) / cleanPrice;
             sz = Math.max(0.001, calculatedSize).toFixed(4);
           }
